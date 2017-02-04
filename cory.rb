@@ -31,6 +31,11 @@ options = OpenStruct.new(
   circles: true,
   input_data: 'data.csv',
   country_data: 'country-codes.csv',
+  colour_rule: :interpolate, # c.f. basket
+  output: 'output.svg',
+  becareful: false,
+  colour_set: :traffic_lights,
+  map: 'BlankMap-World8-cory.svg',
 )
 
 colours = ['#edf8b1','#7fcdbb','#2c7fb8']
@@ -38,11 +43,15 @@ colours = ['#edf8b1','#7fcdbb','#2c7fb8']
 log.debug("Parsing options")
 
 OptionParser.new do |opts|
-  opts.banner = "Usage: #{$0} [options] file1 file1 file3 ..."
+  opts.banner = "Usage: #{$0} [options] output"
   
-  opts.on('-h', '--help', 'Print this help') { puts opts; exit }
-  opts.on('-v', '--verbose', 'Display verbose output') { options.verbose = true }
+  opts.on('-b', '--basket', 'Group countries into discrete baskets (default: linear-ish interpolation, see docs)') { raise "Not implemented"; options.colour_rule = :basket }
+  opts.on('-cFILE', '--countries=FILE', 'Take country name data from FILE (a CSV file)') { |f| options.county_data = f }
+  opts.on('-CSET', '--colour=SET', 'Colour set to use (must be one of available options)') { |set| options.colour_set = set.to_sym }
+  #opts.on('--list-colours', 'List available colour sets') { }
   opts.on('-d', '--dry-run', 'Make no changes, just display what would be done and exit') { options.dry = true }
+  opts.on('-h', '--help', 'Print this help') { puts opts; exit }
+  opts.on('-iFILE', '--input=FILE', 'Take choropleth data from FILE (a CSV file)') { |f| options.input_data = f }
   opts.on('-lLEVEL', '--log=LEVEL', 'Set log level (from debug, info, warn, error, fatal)') do |level|
     log.level = case level
       when 'debug', 4
@@ -60,8 +69,9 @@ OptionParser.new do |opts|
     end
   end
   opts.on('-LFILE', '--logfile=FILE', 'Log to FILE instead of standard error') { |f| log.reopen(f) }
-  opts.on('-iFILE', '--input=FILE', 'Take choropleth data from FILE (a CSV file)') { |f| options.input_data = f }
-  opts.on('-cFILE', '--countries=FILE', 'Take country name data from FILE (a CSV file)') { |f| options.county_data = f }
+  opts.on('-mFILE', '--map=FILE', 'Map file (must have tag indicating where to insert CSS)') { |m| options.map = m }
+  opts.on('-v', '--verbose', 'Display verbose output') { options.verbose = true }
+  opts.on('-w', '--warn', "Don't overwrite any output files") { options.becareful == true }
 
   begin
     opts.parse!
@@ -80,6 +90,8 @@ options.verbose = true if options.dry
 
 log.debug("Started #{$0}")
 
+options.output = ARGV[0] if ARGV[0]
+
 # Colorbrewer2.org
 # Yellow/Blue
 # Light
@@ -93,22 +105,11 @@ log.debug("Started #{$0}")
 #fec44f
 #d95f0e
 
-# Traffic lights
-# 165,0,38
-# 215,48,39
-# 244,109,67
-# 253,174,97
-# 254,224,139
-# 255,255,191
-# 217,239,139
-# 166,217,106
-# 102,189,99
-# 26,152,80
-# 0,104,55
+
 
 class Colour
   # internal: @a = [4, 104, 212] = [r,g,b]
-  def initialize(parms, *extra)
+  def initialize(parms=nil, *extra)
     if extra[0]
       parms = [parms]+extra
     end
@@ -121,17 +122,20 @@ class Colour
     when Array
       raise "Bad colour #{parms}" unless parms.count == 3
       @a = parms.collect {|i| i.to_f.round }
+    when nil
+      @a = [0,0,0]
     else
       raise "Unknown colour type #{parms.to_s}"
     end
   end
-  def to_h(n)
-    n.to_s(16).rjust(2)
+  def []=(index, new_colour)
+    @a[index]=new_colour
   end
-  def to_d(s)
-    s.to_i(16)
+  def [](index)
+    @a[index]
   end
-  def hex
+  def to_hex
+    #binding.pry
     @a.collect{ |x| to_h(x)}.join
   end
   def r; @a[0]; end
@@ -143,16 +147,104 @@ class Colour
   def -(o)
     Colour.new(r-o.r, g-o.g, b-o.b)
   end
+
+  private
+  def to_h(n)
+    # in case n is a float
+    n.round.to_s(16).rjust(2, '0')
+  end
+  def to_d(s)
+    s.to_i(16)
+  end
 end
 
 class Scale
-
+  def initialize(points) # array of colours
+    # 2+ coordinates
+    raise "Invalid scale #{points}" unless points.class.name === 'Array' and points.length > 1
+    @points=points
+  end
+  #def *(index)
+  ##  # linear interpolation
+  ##  # find two closest points
+  ##  # interpolate
+  ##  interpolate(index)
+  #end
+  def *(i)
+    x_n = closest(i)
+    x = x_n.collect{ |j| j*spacing }
+    y = [ @points[x_n[0]],@points[x_n[1]] ]
+    result = Colour.new
+    # edge case that causes problems: bang on a point in the scale (so x[1]-x[0] is divide-by-zero)
+    return @points[x_n[0]] if x_n[0] == x_n[1]
+    # for each element of a colour (r,g,b)
+    [0,1,2].each do |colour|
+      proportion = (i - x[0]) / (x[1] - x[0])
+      #binding.pry
+      result[colour] = y[0][colour] + proportion * (y[1][colour] - y[0][colour])
+      binding.pry if result[colour].nan?
+    end
+    result
+  end
+  def spacing
+    100.0 / (@points.length-1)
+  end
+  def closest(index)
+    ##puts "spacing: #{spacing}"
+    #under,over=100,0
+    #0.upto(@points.length-1) do |n|
+    #  x=n*spacing
+    #  #puts "under: #{under}; over: #{over}; index: #{index}; x: #{x}"
+    #  under = x if x < index
+    #  over = (100 - x) if (100 - x) > index
+    #end
+    #puts "#{[under,over]}.to_s"
+    #puts under, over, index
+    under,over=@points.length,0
+    0.upto(@points.length-1) do |n|
+      under = n if n <= (index / spacing)
+      over = (@points.length - n) if (@points.length - n) >= (index / spacing)
+    end
+    [under,over]
+  end
 end
 
-a=Colour.new '2c7fb8'
-b=Colour.new '#edf8b1'
-c=Colour.new [0, 255, 0]
-binding.pry
+scales = {
+  # Traffic lights
+  # Source: colourbrewer2.org
+  # Copyright Cynthir Brewer, Mark Harrower and the Pennsylvania State University
+  traffic_lights: Scale.new( [
+    Colour.new(165,0,38),
+    Colour.new(215,48,39),
+    Colour.new(244,109,67),
+    Colour.new(253,174,97),
+    Colour.new(254,224,139),
+    Colour.new(255,255,191),
+    Colour.new(217,239,139),
+    Colour.new(166,217,106),
+    Colour.new(102,189,99),
+    Colour.new(26,152,80),
+    Colour.new(0,104,55),
+  ] )
+}
+
+#a=Colour.new('#0000ff')
+#b=Colour.new('#00ff00')
+#c=Colour.new('ff0000')
+#
+#s=Scale.new [a,b,c]
+#
+##a=Colour.new '2c7fb8'
+##b=Colour.new '#edf8b1'
+##c=Colour.new [0, 255, 0]
+##s=Scale.new [a,b]
+##binding.pry
+#
+#binding.pry
+
+#puts (traffic*1).to_hex
+
+#exit
 
 class Country
   def initialize(data) # first: alpha-2 code, remainder: synonyms
@@ -169,7 +261,7 @@ class Country
   end
   def match?(string)
     simple_string = string.gsub(/[\.\,]/,'')
-    binding.pry if @code==''
+    #binding.pry if @code==''
     #binding.pry if string =~ /icro/ && @code=='fm'
     synonyms.include? simple_string
   end
@@ -196,10 +288,10 @@ class Countries
   end
 end
 
-input = 'gdp.csv'
+#input = 'gdp.csv'
 country_file = 'country-codes.csv'
 
-data = CSV.read input
+data = CSV.read options.input_data
 country_data = CSV.read(country_file) #, { headers: true })
 country_data.shift # ditch header
 countries = Countries.new(country_data)
@@ -227,8 +319,6 @@ data.each do |line|
   end
 end
 
-binding.pry
-
 css = []
 diff = max - min
 
@@ -240,8 +330,10 @@ data.each do |line|
     # Look up the 2-letter iso code for the country
     # Convert the raw number into a colour code
     hex = (((value - min) / diff) * 255).round.to_s(16).rjust(2,'0')
+    index = ((value - min) / diff) * 100
     # Output CSS
-    css.push ".#{countries.translate(country)} { fill: #00#{hex}00 }"
+    colour = scales[options.colour_set]*index
+    css.push ".#{countries.translate(country)} { fill: ##{colour.to_hex}; }"
   rescue
     binding.pry
   end
@@ -252,9 +344,14 @@ end
 
 #binding.pry
 
-source = File.readlines('BlankMap-World8-cory.svg')
+source = File.readlines(options.map)
 
-output = File.new('cory.svg', 'w')
+if File.exist? options.output and options.becareful
+  puts "#{options.output} already exists and 'warn' option has been set, exiting"
+  exit
+end
+
+output = File.new(options.output, 'w')
 
 source.each do |l|
   if l =~ /^INJECT-CSS/i
