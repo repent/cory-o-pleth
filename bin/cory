@@ -1,0 +1,5 @@
+#!/usr/bin/ruby
+require 'cory/runner'
+
+runner = Cory::Runner.new(ARGV)
+runner.run
