@@ -70,10 +70,10 @@ module Cory
       #exit
       
       #input = 'gdp.csv'
-      country_file = 'country-codes.csv'
+      #country_file = 'country-codes.csv'
       
       data = CSV.read @options.input_data
-      country_data = CSV.read(country_file) #, { headers: true })
+      country_data = CSV.read(@options.country_data) #, { headers: true })
       country_data.shift # ditch header
       countries = Countries.new(country_data)
       
@@ -106,6 +106,7 @@ module Cory
       data.each do |line|
         country,value=line
         if value then value = value.to_f else next end
+        circles = @options.circles ? "opacity: 1;" : ""
         if countries.has?(country)
           begin
           # Look up the 2-letter iso code for the country
@@ -114,13 +115,30 @@ module Cory
           index = ((value - min) / diff) * 100
           # Output CSS
           colour = scales[@options.colour_set]*index
-          css.push ".#{countries.translate(country)} { fill: ##{colour.to_hex}; }"
+          css.push ".#{countries.translate(country)} { fill: ##{colour.to_hex}; #{circles} }"
         rescue
           binding.pry
         end
         end
       end
-      
+
+      # Add additional CSS lines
+      # Kill world border and antarctica
+
+css.push <<STATIC_CSS
+
+
+.aq { fill: none; }
+.oceanxx {
+   opacity: 1;
+   color: #000000;
+   fill: #ffffff;
+   stroke: #000;
+   stroke-width:0; /* default: 0.5 */
+   stroke-miterlimit:1;
+}
+STATIC_CSS
+
       # Inject CSS into a map
       
       source = File.readlines(@options.map)

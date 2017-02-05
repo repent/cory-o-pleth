@@ -8,17 +8,34 @@ module Cory
 
     def initialize(argv)
       @verbose = false
-      # dry = false,
+      ###############################
+      #### Default configuration ####
+      ###############################
+
+      # These are overridden by command line options
+
       # Display options
       @circles = true
-      @input_data = 'data.csv'
-      @country_data = 'country-codes.csv'
+      # Interpolate selects the closest colour from a pseudo-linear scale
+      # Basket arranges data points into baskets which are all marked with the same colour
       @colour_rule = :interpolate # c.f. basket
-      @output = 'output.svg'
-      @becareful = false
+      # Available colour sets: :traffic_lights
       @colour_set = :traffic_lights
-      @map = 'BlankMap-World8-cory.svg'
       
+      # Set this true if you don't want to overwrite files without asking
+      @becareful = false
+
+      # Default file locations
+      @input_data = 'stats/data.csv'
+      @country_data = 'data/country-codes.csv'
+      @output = 'output.svg'
+      @map = 'maps/BlankMap-World6-cory.svg'
+      #@map = 'maps/BlankMap-World8-cory.svg'
+      
+      ###############################
+      ###############################
+      ###############################
+
       parse(argv)      
       #@options = OpenStruct.new(
       #  verbose: false,
