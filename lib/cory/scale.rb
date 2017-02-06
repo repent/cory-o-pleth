@@ -30,6 +30,12 @@ module Cory
     def spacing
       100.0 / (@points.length-1)
     end
+    def length
+      @points.length
+    end
+    def [](index)
+      @points[index]
+    end
     def closest(index)
       ##puts "spacing: #{spacing}"
       #under,over=100,0

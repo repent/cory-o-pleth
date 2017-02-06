@@ -24,6 +24,8 @@ module Cory
       
       # Set this true if you don't want to overwrite files without asking
       @becareful = false
+      log.level = Logger::DEBUG
+      #log.fatal "Hahahaha"
 
       # Default file locations
       @input_data = 'stats/data.csv'
@@ -63,7 +65,7 @@ module Cory
       OptionParser.new do |opts|
         opts.banner = "Usage: #{$0} [options] output"
         
-        opts.on('-b', '--basket', 'Group countries into discrete baskets (default: linear-ish interpolation, see docs)') { raise "Not implemented"; @colour_rule = :basket }
+        opts.on('-b', '--basket', 'Group countries into discrete baskets (default: linear-ish interpolation, see docs)') { @colour_rule = :basket }
         opts.on('-cFILE', '--countries=FILE', 'Take country name data from FILE (a CSV file)') { |f| @county_data = f }
         opts.on('-CSET', '--colour=SET', 'Colour set to use (must be one of available options)') { |set| @colour_set = set.to_sym }
         #opts.on('--list-colours', 'List available colour sets') { }

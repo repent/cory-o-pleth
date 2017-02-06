@@ -3,6 +3,7 @@ require_relative 'country'
 require_relative 'logging'
 require_relative 'options'
 require_relative 'scale'
+require_relative 'basket'
 require 'csv'
 require 'pry'
 
@@ -76,50 +77,72 @@ module Cory
       country_data = CSV.read(@options.country_data) #, { headers: true })
       country_data.shift # ditch header
       countries = Countries.new(country_data)
-      
-      # check data and find upper and lower bounds
-      
-      max,min=nil,nil
-      
-      data.each do |line|
-        country,value,junk=line
-        # ---Check-country-validates--- (done inside Countries)
-        # Check there is no extraneous data
-        #puts "Found additional data (#{junk})" if junk
-        # Nudge upper/lower bounds
-        begin
-        if value # ignore nils
-          value = value.to_f
-          max ||= value
-          min ||= value
-          max = value if value > max
-          min = value if value < min
-        end
-        rescue
-          binding.pry
-        end
+      css = []
+      circles = @options.circles ? "opacity: 1;" : ""
+
+      # Clean data
+      data.select!{|line| line[1] && line[1].strip != ''}.collect! do |line|
+        country,value=line
+        # Convert string (from CSV) into float
+        if value then value = value.to_f else next end
+        # Neet to make sure that empty values are discarded
+        [ country, value ]
       end
       
-      css = []
-      diff = max - min
-      
-      data.each do |line|
-        country,value=line
-        if value then value = value.to_f else next end
-        circles = @options.circles ? "opacity: 1;" : ""
-        if countries.has?(country)
-          begin
-          # Look up the 2-letter iso code for the country
-          # Convert the raw number into a colour code
-          hex = (((value - min) / diff) * 255).round.to_s(16).rjust(2,'0')
-          index = ((value - min) / diff) * 100
-          # Output CSS
-          colour = scales[@options.colour_set]*index
-          css.push ".#{countries.translate(country)} { fill: ##{colour.to_hex}; #{circles} }"
-        rescue
-          binding.pry
-        end
-        end
+      case @options.colour_rule
+        when :basket
+          basket = Basket.new(scales[@options.colour_set])
+          # get rid of any junk in later columns
+          data.collect! { |d| d.slice(0,2) }
+          colour_array = basket * data
+          colour_array.each do |c|
+            next unless countries.has? c[0]
+            css.push ".#{countries.translate(c[0])} { fill: ##{c[1].to_hex}; #{circles} }"
+          end
+
+        when :interpolate
+          # check data and find upper and lower bounds
+          max,min=nil,nil
+          
+          data.each do |line|
+            country,value,junk=line
+            # ---Check-country-validates--- (done inside Countries)
+            # Nudge upper/lower bounds
+            begin
+              if value # ignore nils
+                value = value.to_f
+                max ||= value
+                min ||= value
+                max = value if value > max
+                min = value if value < min
+              end
+            rescue
+              binding.pry
+            end
+          end
+          
+          diff = max - min
+          
+          data.each do |line|
+            country,value=line
+
+            if countries.has?(country)
+              begin
+                # Look up the 2-letter iso code for the country
+                # Convert the raw number into a colour code
+                hex = (((value - min) / diff) * 255).round.to_s(16).rjust(2,'0')
+                index = ((value - min) / diff) * 100
+                # Output CSS
+                colour = scales[@options.colour_set]*index
+                css.push ".#{countries.translate(country)} { fill: ##{colour.to_hex}; #{circles} }"
+              rescue
+                binding.pry
+              end
+            end
+          end
+        else
+          log.error "Unknown colour rule #{@options.colour_rule}"
+          raise
       end
 
       # Add additional CSS lines
