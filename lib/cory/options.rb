@@ -4,7 +4,7 @@ require 'ostruct'
 module Cory
   class Options < OpenStruct
     include Logging
-    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :colour_set, :map
+    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size
 
     def initialize(argv)
       @verbose = false
@@ -20,7 +20,8 @@ module Cory
       # Basket arranges data points into baskets which are all marked with the same colour
       @colour_rule = :interpolate # c.f. basket
       # Available colour sets: :traffic_lights
-      @colour_set = :traffic_lights
+      @palette = :OrRd
+      @palette_size = 3
       
       # Set this true if you don't want to overwrite files without asking
       @becareful = false
@@ -67,7 +68,7 @@ module Cory
         
         opts.on('-b', '--basket', 'Group countries into discrete baskets (default: linear-ish interpolation, see docs)') { @colour_rule = :basket }
         opts.on('-cFILE', '--countries=FILE', 'Take country name data from FILE (a CSV file)') { |f| @county_data = f }
-        opts.on('-CSET', '--colour=SET', 'Colour set to use (must be one of available options)') { |set| @colour_set = set.to_sym }
+        opts.on('-CSET', '--colour=SET', 'Colour set to use (must be one of available options)') { |set| @palette = set.to_sym }
         #opts.on('--list-colours', 'List available colour sets') { }
         opts.on('-d', '--dry-run', 'Make no changes, just display what would be done and exit') { @dry = true }
         opts.on('-h', '--help', 'Print this help') { puts opts; exit }

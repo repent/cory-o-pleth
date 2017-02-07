@@ -1,16 +1,11 @@
 # basket * data_array [name, index] = colour_array [name, hex_colour]
 
 module Cory
-  class Basket
-    include Logging
+  class Basket < ColourRange
   
-    def initialize(colour_array)
-      @colour_array = colour_array
-    end
-    def n_baskets # should normally be odd
-      log.warn "Number of baskets shouldn't be even (got #{@colour_array.length})" if @colour_array.length % 2 == 0
-      @colour_array.length
-    end
+    #def initialize(colour_array)
+    #  @colour_array = colour_array
+    #end
     def *(data)
       data.sort! { |x,y| x[1] <=> y[1] }
       result = []
@@ -18,7 +13,7 @@ module Cory
       j,k=0,0
       basket_sizes_array = basket_sizes(data.length)
       data.each_with_index do |d,i|
-        result[i] = [ d[0], @colour_array[colour_index] ]
+        result[i] = [ d[0], @points[colour_index] ]
         j += 1
         if j == basket_sizes_array[k]
           colour_index += 1
@@ -27,6 +22,13 @@ module Cory
         end
       end
       result
+    end
+
+    private
+
+    def n_baskets # should normally be odd
+      log.warn "Number of baskets shouldn't be even (got #{@colour_array.length})" if @points.length % 2 == 0
+      @points.length
     end
     def basket_sizes(n_data_points)
       result = Array.new(n_baskets, n_data_points / n_baskets) # will round down

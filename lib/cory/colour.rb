@@ -1,23 +1,22 @@
 module Cory
   class Colour
+    include Logging
     # internal: @a = [4, 104, 212] = [r,g,b]
-    def initialize(parms=nil, *extra)
-      if extra[0]
-        parms = [parms]+extra
-      end
+    def initialize(parms)
       case parms
-      when String
-        s = parms.gsub '#', ''
-        raise "Bad colour #{parms}" unless s.length == 6
-        h_arr=s[0,2],s[2,2],s[4,2]
-        @a = h_arr.collect{ |x| to_d(x) }
-      when Array
-        raise "Bad colour #{parms}" unless parms.count == 3
-        @a = parms.collect {|i| i.to_f.round }
-      when nil
-        @a = [0,0,0]
-      else
-        raise "Unknown colour type #{parms.to_s}"
+        when String
+          s = parms.gsub '#', ''
+          raise "Bad colour #{parms}" unless s.length == 6
+          h_arr=s[0,2],s[2,2],s[4,2]
+          @a = h_arr.collect{ |x| to_d(x) }
+        when Array
+          raise "Bad colour #{parms}" unless parms.count == 3
+          @a = parms.collect {|i| i.to_f.round }
+        when nil
+          @a = [0,0,0]
+        else
+          log.error "Unknown colour type #{parms.to_s}"
+          binding.pry
       end
     end
     def []=(index, new_colour)

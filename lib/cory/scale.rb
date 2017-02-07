@@ -1,22 +1,11 @@
 module Cory
-  class Scale
-    def initialize(points) # array of colours
-      # Need 2+ coordinates for a linear scale but 1 makes sense for a basket, e.g. if we are just
-      # highlighting countries that fit a criterion
-      raise "Invalid scale #{points}" unless points.class.name === 'Array' and points.length >= 1
-      @points=points
-    end
-    #def *(index)
-    ##  # linear interpolation
-    ##  # find two closest points
-    ##  # interpolate
-    ##  interpolate(index)
-    #end
+  class Scale < ColourRange
+    # Multiply this Scale by a data array to return an array of countries and colours
     def *(i)
       x_n = closest(i)
       x = x_n.collect{ |j| j*spacing }
       y = [ @points[x_n[0]],@points[x_n[1]] ]
-      result = Colour.new
+      result = Colour.new('#000000')
       # edge case that causes problems: bang on a point in the scale (so x[1]-x[0] is divide-by-zero)
       return @points[x_n[0]] if x_n[0] == x_n[1]
       # for each element of a colour (r,g,b)
@@ -28,26 +17,12 @@ module Cory
       end
       result
     end
+    # Distance between adjacent points, as a percentage of the overall scale
     def spacing
       100.0 / (@points.length-1)
     end
-    def length
-      @points.length
-    end
-    def [](index)
-      @points[index]
-    end
+    # Returns the points in the scale immediately above and below a given index
     def closest(index)
-      ##puts "spacing: #{spacing}"
-      #under,over=100,0
-      #0.upto(@points.length-1) do |n|
-      #  x=n*spacing
-      #  #puts "under: #{under}; over: #{over}; index: #{index}; x: #{x}"
-      #  under = x if x < index
-      #  over = (100 - x) if (100 - x) > index
-      #end
-      #puts "#{[under,over]}.to_s"
-      #puts under, over, index
       under,over=@points.length,0
       0.upto(@points.length-1) do |n|
         under = n if n <= (index / spacing)
