@@ -49,7 +49,11 @@ module Cory
           Colour.new(102,189,99),
           Colour.new(26,152,80),
           Colour.new(0,104,55),
-        ] )
+        ] ),
+
+        berf_plum: Scale.new( [
+          Colour.new(142,37,141),
+        ] ),
       }
       
       #a=Colour.new('#0000ff')
@@ -81,7 +85,9 @@ module Cory
       circles = @options.circles ? "opacity: 1;" : ""
 
       # Clean data
-      data.select!{|line| line[1] && line[1].strip != ''}.collect! do |line|
+      #binding.pry
+      # select! returns nil if no changes were made, so have to use non-destructive version
+      data = data.select{|line| line[1] && line[1].strip != ''}.collect do |line|
         country,value=line
         # Convert string (from CSV) into float
         if value then value = value.to_f else next end
@@ -122,6 +128,10 @@ module Cory
           end
           
           diff = max - min
+          if diff == 0
+            $stderr.puts "Cannot use linear interpolation if all data points are the same.  Try -b"
+            exit 1
+          end
           
           data.each do |line|
             country,value=line

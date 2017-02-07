@@ -1,8 +1,9 @@
 module Cory
   class Scale
     def initialize(points) # array of colours
-      # 2+ coordinates
-      raise "Invalid scale #{points}" unless points.class.name === 'Array' and points.length > 1
+      # Need 2+ coordinates for a linear scale but 1 makes sense for a basket, e.g. if we are just
+      # highlighting countries that fit a criterion
+      raise "Invalid scale #{points}" unless points.class.name === 'Array' and points.length >= 1
       @points=points
     end
     #def *(index)
