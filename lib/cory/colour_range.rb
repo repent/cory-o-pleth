@@ -33,6 +33,9 @@ module Cory
     def [](index)
       @points[index]
     end
+    def reverse!
+      @points.reverse!
+    end
 
     private
     

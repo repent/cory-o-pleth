@@ -84,6 +84,7 @@ module Cory
       case @options.colour_rule
         when :basket
           basket = Basket.import(@options.palette, @options.palette_size)
+          basket.reverse! if @options.reverse
           # get rid of any junk in later columns
           data.collect! { |d| d.slice(0,2) }
           colour_array = basket * data
@@ -94,6 +95,7 @@ module Cory
 
         when :interpolate
           scale = Scale.import(@options.palette, @options.palette_size)
+          scale.reverse! if @options.reverse
 
           # check data and find upper and lower bounds
           max,min=nil,nil

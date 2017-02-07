@@ -2,9 +2,9 @@ require 'optparse'
 require 'ostruct'
 
 module Cory
-  class Options < OpenStruct
+  class Options
     include Logging
-    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size
+    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse
 
     def initialize(argv)
       @verbose = false
@@ -22,6 +22,7 @@ module Cory
       # Available colour sets: :traffic_lights
       @palette = :OrRd
       @palette_size = 3
+      @reverse = false
       
       # Set this true if you don't want to overwrite files without asking
       @becareful = false
@@ -91,6 +92,7 @@ module Cory
         end
         opts.on('-LFILE', '--logfile=FILE', 'Log to FILE instead of standard error') { |f| log.reopen(f) }
         opts.on('-mFILE', '--map=FILE', 'Map file (must have tag indicating where to insert CSS)') { |m| @map = m }
+        opts.on('-R', '--reverse', 'Reverse palette') { @reverse = true }
         opts.on('-v', '--verbose', 'Display verbose output') { @verbose = true }
         opts.on('-w', '--warn', "Don't overwrite any output files") { @becareful == true }
       
