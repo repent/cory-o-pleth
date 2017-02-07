@@ -68,13 +68,12 @@ module Cory
         opts.banner = "Usage: #{$0} [options] output"
         
         opts.on('-b', '--basket', 'Group countries into discrete baskets (default: linear-ish interpolation, see docs)') { @colour_rule = :basket }
-        opts.on('-cFILE', '--countries=FILE', 'Take country name data from FILE (a CSV file)') { |f| @county_data = f }
-        opts.on('-CSET', '--colour=SET', 'Colour set to use (must be one of available options)') { |set| @palette = set.to_sym }
+        opts.on('-c FILE', '--countries=FILE', 'Take country name data from FILE (a CSV file)') { |f| @county_data = f }
         #opts.on('--list-colours', 'List available colour sets') { }
         opts.on('-d', '--dry-run', 'Make no changes, just display what would be done and exit') { @dry = true }
         opts.on('-h', '--help', 'Print this help') { puts opts; exit }
-        opts.on('-iFILE', '--input=FILE', 'Take choropleth data from FILE (a CSV file)') { |f| @input_data = f }
-        opts.on('-lLEVEL', '--log=LEVEL', 'Set log level (from debug, info, warn, error, fatal)') do |level|
+        opts.on('-i FILE', '--input=FILE', 'Take choropleth data from FILE (a CSV file)') { |f| @input_data = f }
+        opts.on('-l LEVEL', '--log=LEVEL', 'Set log level (from debug, info, warn, error, fatal)') do |level|
           log.level = case level
             when 'debug', 4
               Logger::DEBUG
@@ -92,6 +91,8 @@ module Cory
         end
         opts.on('-LFILE', '--logfile=FILE', 'Log to FILE instead of standard error') { |f| log.reopen(f) }
         opts.on('-mFILE', '--map=FILE', 'Map file (must have tag indicating where to insert CSS)') { |m| @map = m }
+        opts.on('-n N', 'Number of colour levels to use (more important when used with -b) -- the options available are limited by your chosen palette (-p)') { |n| @palette_size = n }
+        opts.on('-p PALETTE', '--palette=PALETTE', 'Palette (set of colours) to use (must be one of available options)') { |set| @palette = set.to_sym }
         opts.on('-R', '--reverse', 'Reverse palette') { @reverse = true }
         opts.on('-v', '--verbose', 'Display verbose output') { @verbose = true }
         opts.on('-w', '--warn', "Don't overwrite any output files") { @becareful == true }
