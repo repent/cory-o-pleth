@@ -12,6 +12,11 @@ module Cory
         when Array
           raise "Bad colour #{parms}" unless parms.count == 3
           @a = parms.collect {|i| i.to_f.round }
+        when Colour
+          # An initialiser HAS TO return a new instance of its class
+          # returning params won't work
+          parms.check
+          @a = parms.to_a
         when nil
           @a = [0,0,0]
         else
@@ -27,7 +32,11 @@ module Cory
     end
     def to_hex
       #binding.pry
-      @a.collect{ |x| to_h(x)}.join
+      begin
+        @a.collect{ |x| to_h(x)}.join
+      rescue
+        binding.pry
+      end
     end
     def r; @a[0]; end
     def g; @a[1]; end
@@ -37,6 +46,13 @@ module Cory
     end
     def -(o)
       Colour.new(r-o.r, g-o.g, b-o.b)
+    end
+    def check
+      raise "Bad colour #{self}" unless @a and @a.class == Array and @a.length == 3 and
+        @a == @a.select {|e| e.class == Fixnum }
+    end
+    def to_a
+      @a
     end
   
     private

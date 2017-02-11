@@ -45,12 +45,13 @@ module Cory
 
     private
     
-    def initialize(points) # array of colours
+    def initialize(points) # array of Colours or strings representing hex colours
       #binding.pry
       # Need 2+ coordinates for a linear scale but 1 makes sense for a basket, e.g. if we are just
       # highlighting countries that fit a criterion
       raise "Invalid scale #{points}" unless points.class.name === 'Array' and points.length >= 1
-      @points=points
+      @points = points.collect { |p| Colour.new(p) }
+      self
     end
   end
 end

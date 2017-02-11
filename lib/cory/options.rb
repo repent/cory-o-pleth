@@ -4,7 +4,7 @@ require 'ostruct'
 module Cory
   class Options
     include Logging
-    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse
+    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :header_row, :logfile, :wb_indicator, :wb_year, :source, :title
 
     def initialize(argv)
       @verbose = false
@@ -27,10 +27,16 @@ module Cory
       # Set this true if you don't want to overwrite files without asking
       @becareful = false
       log.level = Logger::DEBUG
+      @logfile = 'log/cory.log'
       #log.fatal "Hahahaha"
 
       # Data options
+      @source = :file
+      # Is there a header in the CSV statistics file?
       @header_row = false
+      @wb_indicator = 'NV.IND.TOTL.ZS'
+      @wb_year = :latest
+      @title = "World Map"
 
       # Default file locations
       @input_data = 'stats/data.csv'
@@ -71,13 +77,13 @@ module Cory
         opts.banner = "Usage: #{$0} [options] output"
         
         opts.on('-b', '--basket', 'Group countries into discrete baskets (default: linear-ish interpolation, see docs)') { @colour_rule = :basket }
-        opts.on('-c FILE', '--countries=FILE', 'Take country name data from FILE (a CSV file)') { |f| @county_data = f }
+        opts.on('-c', '--countries FILE', 'Take country name data from FILE (a CSV file)') { |f| @county_data = f }
         #opts.on('--list-colours', 'List available colour sets') { }
         opts.on('-d', '--dry-run', 'Make no changes, just display what would be done and exit') { @dry = true }
         opts.on('-h', '--help', 'Print this help') { puts opts; exit }
         opts.on('-H', '--header', 'Ignore first line of CSV input') { @header_row = true }
-        opts.on('-i FILE', '--input=FILE', 'Take choropleth data from FILE (a CSV file)') { |f| @input_data = f }
-        opts.on('-l LEVEL', '--log=LEVEL', 'Set log level (from debug, info, warn, error, fatal)') do |level|
+        opts.on('-i', '--input FILE', 'Take choropleth data from FILE (a CSV file)') { |f| @input_data = f }
+        opts.on('-l', '--log LEVEL', 'Set log level (from debug, info, warn, error, fatal)') do |level|
           log.level = case level
             when 'debug', 4
               Logger::DEBUG
@@ -93,13 +99,18 @@ module Cory
               raise 'Log level must be one of debug, info, warn, error, or fatal'
           end
         end
-        opts.on('-LFILE', '--logfile=FILE', 'Log to FILE instead of standard error') { |f| log.reopen(f) }
-        opts.on('-mFILE', '--map=FILE', 'Map file (must have tag indicating where to insert CSS)') { |m| @map = m }
-        opts.on('-n N', 'Number of colour levels to use (more important when used with -b) -- the options available are limited by your chosen palette (-p)') { |n| @palette_size = n }
-        opts.on('-p PALETTE', '--palette=PALETTE', 'Palette (set of colours) to use (must be one of available options)') { |set| @palette = set.to_sym }
+        opts.on('-L', '--logfile FILE', 'Log to FILE instead of standard error') { |f| log.reopen(f) }
+        opts.on('-m', '--map FILE', 'Map file (must have tag indicating where to insert CSS)') { |m| @map = m }
+        opts.on('-n', '--colour-levels N', 'Number of colour levels to use (more important when used with -b) -- the options available are limited by your chosen palette (-p)') { |n| @palette_size = n }
+        opts.on('-p', '--palette PALETTE', 'Palette (set of colours) to use (must be one of available options)') { |set| @palette = set.to_sym }
         opts.on('-R', '--reverse', 'Reverse palette') { @reverse = true }
         opts.on('-v', '--verbose', 'Display verbose output') { @verbose = true }
         opts.on('-w', '--warn', "Don't overwrite any output files") { @becareful == true }
+        opts.on('-W', '--world-bank [INDICATOR]', 'Use INDICATOR from the World Bank Development Indicators as your source') do |i|
+            @wb_indicator = i || 'NV.IND.TOTL.ZS'
+            @source = :wb
+          end
+        opts.on('-y', '--year', "Year of data to select for World Bank queries") { |y| @wb_year = y }
       
         begin
           #argv = ['h'] if argv.empty?

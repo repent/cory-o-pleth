@@ -23,55 +23,57 @@ module Cory
     end
 
     def run
+      # Importing Country Data
+      # This is not user-editable
+      country_data = CSV.read(@options.country_data)
+      country_data.shift # ditch header
+      countries = Countries.new(country_data)
+      # End of Country Data
 
-      #d = DataCatalog.new
-      #ap d.data('NV.IND.TOTL.ZS')
-      #exit
+      log.debug "Source: #{@options.source}"
 
-      source = :wb
-
-      data = case source
+      # Importing statistics that will be the basis of country colours
+      data = case @options.source
         when :file
-          CSV.read @options.input_data
-          # Clean data
+          @options.title = "World Map: #{@options.input_data}"
+          log.debug "Reading source data from file #{@options.input_data}"
+          data = CSV.read @options.input_data
+
+          # Data Cleaning for CSV
           # select! returns nil if no changes were made, so have to use non-destructive version
-          data = data.select{|line| line[1] && line[1].strip != ''}.collect do |line|
-            country,value=line
-            # Convert string (from CSV) into float
-            if value then value = value.to_f else next end
-            [ country, value ]
-          end
+          # Get rid of later columns and nil values
+          data = data.collect { |d| d.slice(0,2) }.select { |d| d[1] and d[1].strip != '' }
+          # Drop unrecognised countries
+          data = data.select { |d| countries.has? d[0].to_s }
+          # Convert numerical data to floating point (will start off as text if from CSV)
+          data = data.collect { |d| d[1] = d[1].to_f; d }
+          # End of Data Cleaning
+
         when :wb
-          DataCatalog.new.data('NV.IND.TOTL.ZS')
+          log.debug "Downloading source data from World Bank"
+          log.debug "Using dataset #{@options.wb_indicator}"
+          dc = DataCatalog.new(@options.wb_indicator, @options.wb_year)
+          @options.title = dc.title
+          dc.to_a
+          # Data Cleaning for WB done in class
       end
 
-      countries = Countries.new(country_data)
+
       css = []
       circles = @options.circles ? "opacity: 1;" : ""
 
-      # Is there a header?  Normally NOT!
-      country_data = CSV.read(@options.country_data) #, { headers: true })
-      if options.header_row
-        country_data.shift # ditch header
-      else
-        puts "Using first line: #{country_data[0]}"
-      end
 
-      # Data Cleaning
-      # Get rid of later columns and nil values
-      data = data.collect { |d| d.slice(0,2) }.select { |d| d[1] }
-      # Drop unrecognised countries
-      data = data.collect { |d| countries.has? d[0].to_s }
-      # End of Data Cleaning
 
       case @options.colour_rule
-        # Sort data points into n baskets, each containing a similar number
+        # Sort data points into n baskets, each containing a similar number, and colour each
+        # basket according to a colour explicitly defined in PALETTE
         when :basket
           basket = Basket.import(@options.palette, @options.palette_size)
           basket.reverse! if @options.reverse
+
           colour_array = basket * data
           colour_array.each do |c|
-            next unless countries.has? c[0]
+            #next unless countries.has? c[0]
             css.push ".#{countries.translate(c[0])} { fill: ##{c[1].to_hex}; #{circles} }"
           end
 
@@ -82,54 +84,12 @@ module Cory
           scale.reverse! if @options.reverse
 
           colour_array = scale * data
-
-          # This should all be inside the Scale class
-          # check data and find upper and lower bounds
-          max,min=nil,nil
-          
-          data.each do |line|
-            country,value,junk=line
-            # ---Check-country-validates--- (done inside Countries)
-            # Nudge upper/lower bounds
-            begin
-              if value # ignore nils
-                value = value.to_f
-                max ||= value
-                min ||= value
-                max = value if value > max
-                min = value if value < min
-              end
-            rescue
-              binding.pry
-            end
-          end
-          
-          diff = max - min
-          if diff == 0
-            $stderr.puts "Cannot use linear interpolation if all data points are the same.  Try -b"
-            exit 1
-          end
-          
-          data.each do |line|
-            country,value=line
-
-            if countries.has?(country) and value # drop nils
-              begin
-                # Look up the 2-letter iso code for the country
-                # Convert the raw number into a colour code
-                hex = (((value - min) / diff) * 255).round.to_s(16).rjust(2,'0')
-                index = ((value - min) / diff) * 100
-                # Output CSS
-                colour = scale*index
-                css.push ".#{countries.translate(country)} { fill: ##{colour.to_hex}; #{circles} } /* raw value: #{value} */"
-              #rescue
-                #binding.pry
-              end
-            end
+          colour_array.each do |c|
+            css.push ".#{countries.translate(c[0])} { fill: ##{c[1].to_hex}; #{circles} }"
           end
         else
-          log.error "Unknown colour rule #{@options.colour_rule}"
-          raise
+          log.fatal "Unknown colour rule #{@options.colour_rule}"
+          exit 1
       end
 
       # Add additional CSS lines
@@ -165,6 +125,8 @@ STATIC_CSS
           css.each do |m|
             output.puts m
           end
+        elsif l =~ /World Map/
+          output.puts l.sub(/World Map/, @options.title)
         else
           output.puts l
         end

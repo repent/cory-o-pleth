@@ -1,9 +1,45 @@
 module Cory
   class Scale < ColourRange
-
     # Multiply this Scale by a data array to return an array of countries and colours
     # Currently this is only being multiplied by a float
-    def *(i)
+    def *(data)
+      raise "Scale.* requires an array (got #{data})" unless data.class == Array
+      
+      # Find upper and lower bounds, and the distance between them
+      min,max = limits(data)
+      diff = max - min
+      if diff == 0
+        $stderr.puts "Cannot use linear interpolation if all data points are the same.  Try -b"
+        exit 1
+      end
+
+      result = []
+      data.each do |line|
+        country,value=line
+        # hex = (((value - min) / diff) * 255).round.to_s(16).rjust(2,'0')
+        index = ((value - min) / diff) * 100 # diff checked for zero above
+        result.push([ country, index_to_colour(index) ])
+      end
+
+      result # Array, each line [ 'country_name', Colour ]
+    end
+
+    private
+
+    def limits(data)
+      min=max=nil
+      data.each do |line|
+        value=line[1]
+        # Nudge upper/lower bounds
+        max ||= value
+        min ||= value
+        max = value if value > max
+        min = value if value < min
+      end
+      [min,max]
+    end
+
+    def index_to_colour(i)
       x_n = closest(i)
       x = x_n.collect{ |j| j*spacing }
       y = [ @points[x_n[0]],@points[x_n[1]] ]
@@ -13,12 +49,13 @@ module Cory
       # for each element of a colour (r,g,b)
       [0,1,2].each do |colour|
         proportion = (i - x[0]) / (x[1] - x[0])
-        binding.pry
         result[colour] = y[0][colour] + proportion * (y[1][colour] - y[0][colour])
         binding.pry if result[colour].nan?
       end
-      result  # Array, each line [ 'country_name', Colour ]
+      result # Colour
     end
+
+    public
 
     # Distance between adjacent points, as a percentage of the overall scale
     def spacing
