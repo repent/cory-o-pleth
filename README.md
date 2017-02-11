@@ -4,7 +4,18 @@ A command-line tool for converting csv data into choropleth maps.
 
 For example output, see https://en.wikipedia.org/wiki/File:Doing_business_2017.svg
 
-# Contributions
+## Contributions and licensing
+
+### Maps
+
+Maps included with Cory O'Pleth are distributed under the following licences:
+
+ * BlankMap-World6.svg: public domain
+ * BlankMap-World8.svg: public domain
+ * BlankMap-Africa.svg: public domain
+ * Blank_map_of_Europe_cropped: CC Attribution-Share Alike 2.5 Generic (https://creativecommons.org/licenses/by-sa/2.5/deed.en); map by Maix based on work by Julio Reis
+
+### Colorbrewer
 
 This product includes colour specifications and designs developed by Cynthia Brewer (http://colorbrewer2.org/).  These are licensed under the Apache Licence, Version 2.0, available from
 http://www.apache.org/licenses/LICENSE-2.0

@@ -6,8 +6,11 @@ require_relative 'colour_range'
 require_relative 'scale'
 require_relative 'basket'
 require_relative 'colorbrewer'
+require_relative 'data_catalog'
+#require_relative 'datapoint'
 require 'csv'
 require 'pry'
+require 'ap'
 
 # Bugs
 # * For some reason Ukraine isn't shaded!
@@ -20,79 +23,51 @@ module Cory
     end
 
     def run
-      #log = Logger.new($stout)
-      #log.level = Logger::ERROR
-      
-      # Colorbrewer2.org
-      # Yellow/Blue
-      # Light
-      #edf8b1
-      #7fcdbb
-      #2c7fb8
-      # Dark
-      
-      # Brown
-      #fff7bc
-      #fec44f
-      #d95f0e
 
-      #scale = Scale.import(:OrRd, 5)
-      #scale = Scale.import(:berf_plum, 1)
+      #d = DataCatalog.new
+      #ap d.data('NV.IND.TOTL.ZS')
+      #exit
 
-      
-      #scales = {
-      #  # Traffic lights
-      #  # Source: colourbrewer2.org
-      #  # Copyright Cynthir Brewer, Mark Harrower and the Pennsylvania State University
-      #  traffic_lights: Scale.new( [
-      #    Colour.new(165,0,38),
-      #    Colour.new(215,48,39),
-      #    Colour.new(244,109,67),
-      #    Colour.new(253,174,97),
-      #    Colour.new(254,224,139),
-      #    Colour.new(255,255,191),
-      #    Colour.new(217,239,139),
-      #    Colour.new(166,217,106),
-      #    Colour.new(102,189,99),
-      #    Colour.new(26,152,80),
-      #    Colour.new(0,104,55),
-      #  ] ),
-#
-      #  berf_plum: Scale.new( [
-      #    Colour.new(142,37,141),
-      #  ] ),
-      #}
-      
-      data = CSV.read @options.input_data
+      source = :wb
+
+      data = case source
+        when :file
+          CSV.read @options.input_data
+          # Clean data
+          # select! returns nil if no changes were made, so have to use non-destructive version
+          data = data.select{|line| line[1] && line[1].strip != ''}.collect do |line|
+            country,value=line
+            # Convert string (from CSV) into float
+            if value then value = value.to_f else next end
+            [ country, value ]
+          end
+        when :wb
+          DataCatalog.new.data('NV.IND.TOTL.ZS')
+      end
+
+
+
       country_data = CSV.read(@options.country_data) #, { headers: true })
       country_data.shift # ditch header
       countries = Countries.new(country_data)
       css = []
       circles = @options.circles ? "opacity: 1;" : ""
 
-      # Clean data
-      #binding.pry
-      # select! returns nil if no changes were made, so have to use non-destructive version
-      data = data.select{|line| line[1] && line[1].strip != ''}.collect do |line|
-        country,value=line
-        # Convert string (from CSV) into float
-        if value then value = value.to_f else next end
-        # Neet to make sure that empty values are discarded
-        [ country, value ]
-      end
-      
       case @options.colour_rule
+        # Sort data points into n baskets, each containing a similar number
         when :basket
           basket = Basket.import(@options.palette, @options.palette_size)
           basket.reverse! if @options.reverse
           # get rid of any junk in later columns
-          data.collect! { |d| d.slice(0,2) }
+          data = data.collect { |d| d.slice(0,2) }.select { |d| d[1] }
           colour_array = basket * data
           colour_array.each do |c|
             next unless countries.has? c[0]
             css.push ".#{countries.translate(c[0])} { fill: ##{c[1].to_hex}; #{circles} }"
           end
 
+        # Give each data point its own colour based on its position between the largest
+        # and smallest value
         when :interpolate
           scale = Scale.import(@options.palette, @options.palette_size)
           scale.reverse! if @options.reverse
@@ -126,7 +101,7 @@ module Cory
           data.each do |line|
             country,value=line
 
-            if countries.has?(country)
+            if countries.has?(country) and value # drop nils
               begin
                 # Look up the 2-letter iso code for the country
                 # Convert the raw number into a colour code
@@ -134,7 +109,7 @@ module Cory
                 index = ((value - min) / diff) * 100
                 # Output CSS
                 colour = scale*index
-                css.push ".#{countries.translate(country)} { fill: ##{colour.to_hex}; #{circles} }"
+                css.push ".#{countries.translate(country)} { fill: ##{colour.to_hex}; #{circles} } /* raw value: #{value} */"
               #rescue
                 #binding.pry
               end

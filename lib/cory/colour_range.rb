@@ -11,18 +11,23 @@ module Cory
       colourset = PALETTES[name.to_sym] # A colour set has different numbers of divisions the same colour range
       unless colourset
         $stderr.puts "Colorbrewer does not have a set called #{name}."
+        $stderr.puts "Try: #{available}" #.scan(/\S.{0,70\S(?=\s|$)|\S+/)
         exit 1
       end
-      colourrange = colourset.select{ |r| r.length == levels }
-      if colourrange
+      colourrange = colourset.select{ |r| r.length == levels.to_i }
+      if colourrange and colourrange.length>0
         # Convert this info (which could be in different formats) into Colours
         # Colour.new is forgiving
         colourrange = colourrange.first
-        return self.new(colourrange.collect{ |c| Colour.new(c) })
       else
-        $stderr.puts "Colorbrewer set #{name} exists, but does not have a set of #{levels} colours -- choose from #{cb.map{ |r| r.length }.join(', ')}"
+        $stderr.puts "Colorbrewer set #{name} exists, but does not have a set of #{levels} colours -- choose from #{colourset.map{ |r| r.length }.join(', ')}"
         exit 1
       end
+      self.new(colourrange)
+    end
+
+    def self.available
+      PALETTES.to_a.collect { |a| a[0].to_s }.join(', ')
     end
 
     # Instance methods
@@ -35,6 +40,7 @@ module Cory
     end
     def reverse!
       @points.reverse!
+      self # otherwise this would return an array
     end
 
     private

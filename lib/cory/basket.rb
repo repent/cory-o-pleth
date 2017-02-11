@@ -13,7 +13,7 @@ module Cory
       j,k=0,0
       basket_sizes_array = basket_sizes(data.length)
       data.each_with_index do |d,i|
-        result[i] = [ d[0], @points[colour_index] ]
+        result[i] = [ d[0], Colour.new(@points[colour_index]) ]
         j += 1
         if j == basket_sizes_array[k]
           colour_index += 1
