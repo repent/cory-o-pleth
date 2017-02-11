@@ -21,7 +21,7 @@ module Cory
           k+=1
         end
       end
-      result
+      result # Array, each line [ 'country_name', Colour ]
     end
 
     private

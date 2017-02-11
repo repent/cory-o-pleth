@@ -29,6 +29,9 @@ module Cory
       log.level = Logger::DEBUG
       #log.fatal "Hahahaha"
 
+      # Data options
+      @header_row = false
+
       # Default file locations
       @input_data = 'stats/data.csv'
       @country_data = 'data/country-codes.csv'
@@ -72,6 +75,7 @@ module Cory
         #opts.on('--list-colours', 'List available colour sets') { }
         opts.on('-d', '--dry-run', 'Make no changes, just display what would be done and exit') { @dry = true }
         opts.on('-h', '--help', 'Print this help') { puts opts; exit }
+        opts.on('-H', '--header', 'Ignore first line of CSV input') { @header_row = true }
         opts.on('-i FILE', '--input=FILE', 'Take choropleth data from FILE (a CSV file)') { |f| @input_data = f }
         opts.on('-l LEVEL', '--log=LEVEL', 'Set log level (from debug, info, warn, error, fatal)') do |level|
           log.level = case level

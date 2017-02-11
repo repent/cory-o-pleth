@@ -1,6 +1,8 @@
 module Cory
   class Scale < ColourRange
+
     # Multiply this Scale by a data array to return an array of countries and colours
+    # Currently this is only being multiplied by a float
     def *(i)
       x_n = closest(i)
       x = x_n.collect{ |j| j*spacing }
@@ -11,12 +13,13 @@ module Cory
       # for each element of a colour (r,g,b)
       [0,1,2].each do |colour|
         proportion = (i - x[0]) / (x[1] - x[0])
-        #binding.pry
+        binding.pry
         result[colour] = y[0][colour] + proportion * (y[1][colour] - y[0][colour])
         binding.pry if result[colour].nan?
       end
-      result
+      result  # Array, each line [ 'country_name', Colour ]
     end
+
     # Distance between adjacent points, as a percentage of the overall scale
     def spacing
       100.0 / (@points.length-1)

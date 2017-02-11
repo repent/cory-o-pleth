@@ -45,21 +45,30 @@ module Cory
           DataCatalog.new.data('NV.IND.TOTL.ZS')
       end
 
-
-
-      country_data = CSV.read(@options.country_data) #, { headers: true })
-      country_data.shift # ditch header
       countries = Countries.new(country_data)
       css = []
       circles = @options.circles ? "opacity: 1;" : ""
+
+      # Is there a header?  Normally NOT!
+      country_data = CSV.read(@options.country_data) #, { headers: true })
+      if options.header_row
+        country_data.shift # ditch header
+      else
+        puts "Using first line: #{country_data[0]}"
+      end
+
+      # Data Cleaning
+      # Get rid of later columns and nil values
+      data = data.collect { |d| d.slice(0,2) }.select { |d| d[1] }
+      # Drop unrecognised countries
+      data = data.collect { |d| countries.has? d[0].to_s }
+      # End of Data Cleaning
 
       case @options.colour_rule
         # Sort data points into n baskets, each containing a similar number
         when :basket
           basket = Basket.import(@options.palette, @options.palette_size)
           basket.reverse! if @options.reverse
-          # get rid of any junk in later columns
-          data = data.collect { |d| d.slice(0,2) }.select { |d| d[1] }
           colour_array = basket * data
           colour_array.each do |c|
             next unless countries.has? c[0]
@@ -72,6 +81,9 @@ module Cory
           scale = Scale.import(@options.palette, @options.palette_size)
           scale.reverse! if @options.reverse
 
+          colour_array = scale * data
+
+          # This should all be inside the Scale class
           # check data and find upper and lower bounds
           max,min=nil,nil
           
