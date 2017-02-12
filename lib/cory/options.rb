@@ -4,7 +4,7 @@ require 'ostruct'
 module Cory
   class Options
     include Logging
-    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :header_row, :logfile, :wb_indicator, :wb_year, :source, :title
+    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :header_row, :logfile, :wb_indicator, :wb_year, :source, :title, :print_discards
 
     def initialize(argv)
       @verbose = false
@@ -37,6 +37,7 @@ module Cory
       @wb_indicator = 'NV.IND.TOTL.ZS'
       @wb_year = :latest
       @title = "World Map"
+      @print_discards = false
 
       # Default file locations
       @input_data = 'stats/data.csv'
@@ -79,7 +80,7 @@ module Cory
         opts.on('-b', '--basket', 'Group countries into discrete baskets (default: linear-ish interpolation, see docs)') { @colour_rule = :basket }
         opts.on('-c', '--countries FILE', 'Take country name data from FILE (a CSV file)') { |f| @county_data = f }
         #opts.on('--list-colours', 'List available colour sets') { }
-        opts.on('-d', '--dry-run', 'Make no changes, just display what would be done and exit') { @dry = true }
+        opts.on('-d', '--print-discards', "Print country names that aren's matched") { @print_discards = true }
         opts.on('-h', '--help', 'Print this help') { puts opts; exit }
         opts.on('-H', '--header', 'Ignore first line of CSV input') { @header_row = true }
         opts.on('-i', '--input FILE', 'Take choropleth data from FILE (a CSV file)') { |f| @input_data = f }

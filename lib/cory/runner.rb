@@ -7,6 +7,7 @@ require_relative 'scale'
 require_relative 'basket'
 require_relative 'colorbrewer'
 require_relative 'data_catalog'
+require_relative 'indicators'
 #require_relative 'datapoint'
 require 'csv'
 require 'pry'
@@ -23,6 +24,8 @@ module Cory
     end
 
     def run
+      #i=Indicators.new
+      #binding.pry
       # Importing Country Data
       # This is not user-editable
       country_data = CSV.read(@options.country_data)
@@ -31,6 +34,8 @@ module Cory
       # End of Country Data
 
       log.debug "Source: #{@options.source}"
+
+      unrecognised = []
 
       # Importing statistics that will be the basis of country colours
       data = case @options.source
@@ -45,6 +50,7 @@ module Cory
           data = data.collect { |d| d.slice(0,2) }.select { |d| d[1] and d[1].strip != '' }
           # Drop unrecognised countries
           data = data.select { |d| countries.has? d[0].to_s }
+          unrecognised = data.select { |d| !countries.has? d[0].to_s }
           # Convert numerical data to floating point (will start off as text if from CSV)
           data = data.collect { |d| d[1] = d[1].to_f; d }
           # End of Data Cleaning
@@ -118,6 +124,7 @@ STATIC_CSS
         exit
       end
       
+      log.info "Writing output to #{@options.output}"
       output = File.new(@options.output, 'w')
       
       source.each do |l|
@@ -130,6 +137,11 @@ STATIC_CSS
         else
           output.puts l
         end
+      end
+      if @options.print_discards
+        raise "Unavailable option" if @options.source == :wb
+        puts "These countries weren't recognised:" if unrecognised.length > 0
+        unrecognised.each { |u| puts u[0] }
       end
     end
   end
