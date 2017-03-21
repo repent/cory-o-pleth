@@ -104,7 +104,8 @@ module Cory
         opts.on('-m', '--map FILE', 'Map file (must have tag indicating where to insert CSS)') { |m| @map = m }
         opts.on('-n', '--colour-levels N', 'Number of colour levels to use (more important when used with -b) -- the options available are limited by your chosen palette (-p)') { |n| @palette_size = n }
         opts.on('-p', '--palette PALETTE', 'Palette (set of colours) to use (must be one of available options)') { |set| @palette = set.to_sym }
-        opts.on('-R', '--reverse', 'Reverse palette') { @reverse = true }
+        opts.on('-R', '--reverse', 'Reverse palette') { @reverse = true; log.debug "Reversing colours" }
+        opts.on('-t', '--title TITLE', 'Set a title for the graph') { |t| @title = t }
         opts.on('-v', '--verbose', 'Display verbose output') { @verbose = true }
         opts.on('-w', '--warn', "Don't overwrite any output files") { @becareful == true }
         opts.on('-W', '--world-bank [INDICATOR]', 'Use INDICATOR from the World Bank Development Indicators as your source') do |i|

@@ -2,6 +2,24 @@
 
 A command-line tool for converting csv data into choropleth maps.
 
+Usage: bin/cory [options] output
+    -b, --basket                     Group countries into discrete baskets (default: linear-ish interpolation, see docs)
+    -c, --countries FILE             Take country name data from FILE (a CSV file)
+    -d, --print-discards             Print country names that aren's matched
+    -h, --help                       Print this help
+    -H, --header                     Ignore first line of CSV input
+    -i, --input FILE                 Take choropleth data from FILE (a CSV file)
+    -l, --log LEVEL                  Set log level (from debug, info, warn, error, fatal)
+    -L, --logfile FILE               Log to FILE instead of standard error
+    -m, --map FILE                   Map file (must have tag indicating where to insert CSS)
+    -n, --colour-levels N            Number of colour levels to use (more important when used with -b) -- the options available are limited by your chosen palette (-p)
+    -p, --palette PALETTE            Palette (set of colours) to use (must be one of available options)
+    -R, --reverse                    Reverse palette
+    -v, --verbose                    Display verbose output
+    -w, --warn                       Don't overwrite any output files
+    -W, --world-bank [INDICATOR]     Use INDICATOR from the World Bank Development Indicators as your source
+    -y, --year                       Year of data to select for World Bank queries
+
 For example output, see https://en.wikipedia.org/wiki/File:Doing_business_2017.svg
 
 ## Contributions and licensing

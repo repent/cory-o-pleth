@@ -39,6 +39,7 @@ module Cory
       @points[index]
     end
     def reverse!
+      binding.pry
       @points.reverse!
       self # otherwise this would return an array
     end
