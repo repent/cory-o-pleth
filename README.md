@@ -2,27 +2,49 @@
 
 A command-line tool for converting csv data into choropleth maps.
 
-Usage: bin/cory [options] output
-    -b, --basket                     Group countries into discrete baskets (default: linear-ish interpolation, see docs)
-    -c, --countries FILE             Take country name data from FILE (a CSV file)
-    -d, --print-discards             Print country names that aren's matched
-    -h, --help                       Print this help
-    -H, --header                     Ignore first line of CSV input
-    -i, --input FILE                 Take choropleth data from FILE (a CSV file)
-    -l, --log LEVEL                  Set log level (from debug, info, warn, error, fatal)
-    -L, --logfile FILE               Log to FILE instead of standard error
-    -m, --map FILE                   Map file (must have tag indicating where to insert CSS)
-    -n, --colour-levels N            Number of colour levels to use (more important when used with -b) -- the options available are limited by your chosen palette (-p)
-    -p, --palette PALETTE            Palette (set of colours) to use (must be one of available options)
-    -R, --reverse                    Reverse palette
-    -v, --verbose                    Display verbose output
-    -w, --warn                       Don't overwrite any output files
-    -W, --world-bank [INDICATOR]     Use INDICATOR from the World Bank Development Indicators as your source
-    -y, --year                       Year of data to select for World Bank queries
+## Usage
+
+    Usage: ruby -I lib bin/cory [options] output
+        -b, --basket                     Group countries into discrete baskets (default: linear-ish     interpolation, see docs)
+        -c, --countries FILE             Take country name data from FILE (a CSV file)
+        -d, --print-discards             Print country names that aren's matched
+        -h, --help                       Print this help
+        -H, --header                     Ignore first line of CSV input
+        -i, --input FILE                 Take choropleth data from FILE (a CSV file)
+        -l, --log LEVEL                  Set log level (from debug, info, warn, error, fatal)
+        -L, --logfile FILE               Log to FILE instead of standard error
+        -m, --map FILE                   Map file (must have tag indicating where to insert CSS)
+        -n, --colour-levels N            Number of colour levels to use (more important when used with     -b) -- the options available are limited by your chosen palette (-p)
+        -p, --palette PALETTE            Palette (set of colours) to use (must be one of available     options)
+        -R, --reverse                    Reverse palette
+        -v, --verbose                    Display verbose output
+        -w, --warn                       Don't overwrite any output files
+        -W, --world-bank [INDICATOR]     Use INDICATOR from the World Bank Development Indicators as     your source
+        -y, --year                       Year of data to select for World Bank queries
 
 For example output, see https://en.wikipedia.org/wiki/File:Doing_business_2017.svg
 
+## Examples
+
+### Africa visa openness 2016
+
+Input data: https://gist.github.com/repent/85ac63da2e99d057cc07977ca94bd5dd (saved in stats/)
+
+Output: https://commons.wikimedia.org/wiki/File:Africa_Visa_Openness_in_2016.svg
+
+Command:
+
+    ruby -I lib bin/cory -b -n 7 -i stats/africa_visa_openness_2016.csv -m maps/BlankMap-Africa-cory.svg -p RdYlGn africa_visa_openness_2016.svg
+
 ## Contributions and licensing
+
+### Cory O'Pleth
+
+Cory O'Pleth is copyright 2017 Dan Hetherington.
+
+Cory O'Pleth is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+Cory O'Pleth is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 ### Maps
 
