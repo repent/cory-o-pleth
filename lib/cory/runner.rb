@@ -40,7 +40,7 @@ module Cory
       # Importing statistics that will be the basis of country colours
       data = case @options.source
         when :file
-          @options.title = "World Map: #{@options.input_data}"
+          #@options.title = "World Map: #{@options.input_data}"
           log.debug "Reading source data from file #{@options.input_data}"
           data = CSV.read @options.input_data
 
@@ -48,9 +48,9 @@ module Cory
           # select! returns nil if no changes were made, so have to use non-destructive version
           # Get rid of later columns and nil values
           data = data.collect { |d| d.slice(0,2) }.select { |d| d[1] and d[1].strip != '' }
-          # Drop unrecognised countries
-          data = data.select { |d| countries.has? d[0].to_s }
+          # Remove unrecognised countries (but remember what the failures were)
           unrecognised = data.select { |d| !countries.has? d[0].to_s }
+          data = data.select { |d| countries.has? d[0].to_s }
           # Convert numerical data to floating point (will start off as text if from CSV)
           data = data.collect { |d| d[1] = d[1].to_f; d }
           # End of Data Cleaning
@@ -140,8 +140,8 @@ STATIC_CSS
       end
       if @options.print_discards
         raise "Unavailable option" if @options.source == :wb
-        puts "These countries weren't recognised:" if unrecognised.length > 0
-        unrecognised.each { |u| puts u[0] }
+        puts "\nThese countries weren't recognised:" if unrecognised.length > 0
+        unrecognised.each { |u| puts "   #{u[0]}" }
       end
     end
   end
