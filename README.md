@@ -1,28 +1,36 @@
 # Cory O'Pleth
 
-A command-line tool for converting csv data into choropleth maps.
+A command-line tool for converting csv data into choropleth maps.  It can also be used to combine datasets from different sources using a gradually expanding set of country synonyms (experimental).
 
 ## Usage
 
-    Usage: ruby -I lib bin/cory [options] output
-        -b, --basket                     Group countries into discrete baskets (default: linear-ish     interpolation, see docs)
+    Usage: bin/cory [options] [input] [input] [output]
+        -b, --basket                     Group countries into discrete baskets (default: linear-ish interpolation, see docs)
         -c, --countries FILE             Take country name data from FILE (a CSV file)
+        -C, --combine-csv                Combine two CSV files into one (do not output a map)
         -d, --print-discards             Print country names that aren's matched
         -h, --help                       Print this help
         -H, --header                     Ignore first line of CSV input
-        -i, --input FILE                 Take choropleth data from FILE (a CSV file)
         -l, --log LEVEL                  Set log level (from debug, info, warn, error, fatal)
         -L, --logfile FILE               Log to FILE instead of standard error
+        -k, --keep-incomplete            Keep countries that have incomplete data (still discards those with no data; only makes sense with -C
+        -K, --keep-all                   Output all countries even if they do not appear in input file (the complete list of "countries" may be arbitrary)
         -m, --map FILE                   Map file (must have tag indicating where to insert CSS)
-        -n, --colour-levels N            Number of colour levels to use (more important when used with     -b) -- the options available are limited by your chosen palette (-p)
-        -p, --palette PALETTE            Palette (set of colours) to use (must be one of available     options)
+        -n, --colour-levels N            Number of colour levels to use (more important when used with -b) -- the options available are limited by your chosen palette (-p)
+        -p, --palette PALETTE            Palette (set of colours) to use (must be one of available options)
         -R, --reverse                    Reverse palette
+        -t, --title TITLE                Set a title for the graph
         -v, --verbose                    Display verbose output
         -w, --warn                       Don't overwrite any output files
-        -W, --world-bank [INDICATOR]     Use INDICATOR from the World Bank Development Indicators as     your source
+        -W, --world-bank [INDICATOR]     Use INDICATOR from the World Bank Development Indicators as your source
         -y, --year                       Year of data to select for World Bank queries
 
+
 For example output, see https://en.wikipedia.org/wiki/File:Doing_business_2017.svg
+
+## Combining data sets
+
+Use -C with multiple input files to combine CSV data sets into a single CSV file.  It doesn't matter if the countries are inconsistently named or the sets have different coverage.  Manage incompleteness with -k and -K.
 
 ## Examples
 

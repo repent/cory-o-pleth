@@ -4,7 +4,7 @@ require 'ostruct'
 module Cory
   class Options
     include Logging
-    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :header_row, :logfile, :wb_indicator, :wb_year, :source, :title, :print_discards
+    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :header_row, :logfile, :wb_indicator, :wb_year, :source, :title, :print_discards, :create_map, :keep_incomplete_data, :keep_all, :one_column_per_file
 
     def initialize(argv)
       @verbose = false
@@ -39,8 +39,14 @@ module Cory
       @title = "World Map"
       @print_discards = false
 
+      # CSV-to-CSV options
+      @create_map = true
+      @keep_incomplete_data = false
+      @keep_all = false
+      @one_column_per_file = true
+
       # Default file locations
-      @input_data = 'stats/data.csv'
+      @input_data = [ 'stats/data.csv' ]
       @country_data = 'data/country-codes.csv'
       @output = 'output.svg'
       @map = 'maps/BlankMap-World6-cory.svg'
@@ -75,15 +81,20 @@ module Cory
 
     def parse(argv)
       OptionParser.new do |opts|
-        opts.banner = "Usage: #{$0} [options] output"
+        opts.banner = "Usage: #{$0} [options] [input] [input] [output]"
         
         opts.on('-b', '--basket', 'Group countries into discrete baskets (default: linear-ish interpolation, see docs)') { @colour_rule = :basket }
         opts.on('-c', '--countries FILE', 'Take country name data from FILE (a CSV file)') { |f| @county_data = f }
+        opts.on('-C', '--combine-csv', 'Combine two CSV files into one (do not output a map)') do
+          puts "Warning: CSV files MUST contain header rows!"
+          @create_map = false
+          @output = 'output.csv'
+        end
         #opts.on('--list-colours', 'List available colour sets') { }
         opts.on('-d', '--print-discards', "Print country names that aren's matched") { @print_discards = true }
         opts.on('-h', '--help', 'Print this help') { puts opts; exit }
         opts.on('-H', '--header', 'Ignore first line of CSV input') { @header_row = true }
-        opts.on('-i', '--input FILE', 'Take choropleth data from FILE (a CSV file)') { |f| @input_data = f }
+        #opts.on('-i', '--input FILE', 'Take choropleth data from FILE (a CSV file)') { |f| @input_data = f }
         opts.on('-l', '--log LEVEL', 'Set log level (from debug, info, warn, error, fatal)') do |level|
           log.level = case level
             when 'debug', 4
@@ -101,6 +112,8 @@ module Cory
           end
         end
         opts.on('-L', '--logfile FILE', 'Log to FILE instead of standard error') { |f| log.reopen(f) }
+        opts.on('-k', '--keep-incomplete', 'Keep countries that have incomplete data (still discards those with no data; only makes sense with -C') { @keep_incomplete_data = true }
+        opts.on('-K', '--keep-all', 'Output all countries even if they do not appear in input file (the complete list of "countries" may be arbitrary)') { @keep_all = true }
         opts.on('-m', '--map FILE', 'Map file (must have tag indicating where to insert CSS)') { |m| @map = m }
         opts.on('-n', '--colour-levels N', 'Number of colour levels to use (more important when used with -b) -- the options available are limited by your chosen palette (-p)') { |n| @palette_size = n }
         opts.on('-p', '--palette PALETTE', 'Palette (set of colours) to use (must be one of available options)') { |set| @palette = set.to_sym }
@@ -127,9 +140,15 @@ module Cory
           exit 1
         end
       end
-      @output = argv[0] if argv[0]
+
+      # Deal with remaining arguments (input and output filenames)
+      unless argv.empty?
+        @output = argv.pop
+        unless argv.empty?
+          @input_data = argv.dup
+        end
+      end
+      #@output = argv[0] if argv[0]
     end
-    
-    #log.debug("Started #{$0}")
   end
 end
