@@ -3,8 +3,13 @@ module Cory
     # Multiply this Scale by a data array to return an array of countries and colours
     # Currently this is only being multiplied by a float
     def *(data)
-      raise "Scale.* requires an array (got #{data})" unless data.class == Array
-      
+      begin
+        raise "Scale.* requires a populated array (got #{data})" unless data.class == Array and !data.empty?
+      rescue => e
+        ap e.error
+        ap e.backtrace
+      end
+
       # Find upper and lower bounds, and the distance between them
       min,max = limits(data)
       diff = max - min

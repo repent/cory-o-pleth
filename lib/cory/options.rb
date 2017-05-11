@@ -78,7 +78,7 @@ module Cory
         opts.banner = "Usage: #{$0} [options] output"
         
         opts.on('-b', '--basket', 'Group countries into discrete baskets (default: linear-ish interpolation, see docs)') { @colour_rule = :basket }
-        opts.on('-c', '--countries FILE', 'Take country name data from FILE (a CSV file)') { |f| @county_data = f }
+        opts.on('-c', '--countries FILE', 'Take country name data from FILE (a CSV file)') { |f| @country_data = f }
         #opts.on('--list-colours', 'List available colour sets') { }
         opts.on('-d', '--print-discards', "Print country names that aren's matched") { @print_discards = true }
         opts.on('-h', '--help', 'Print this help') { puts opts; exit }

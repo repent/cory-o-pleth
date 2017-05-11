@@ -28,6 +28,7 @@ module Cory
       #binding.pry
       # Importing Country Data
       # This is not user-editable
+      log.debug "Area names: #{@options.country_data}"
       country_data = CSV.read(@options.country_data)
       country_data.shift # ditch header
       countries = Countries.new(country_data)
