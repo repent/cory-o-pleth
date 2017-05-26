@@ -54,6 +54,7 @@ Maps included with Cory O'Pleth are distributed under the following licences:
  * BlankMap-World8.svg: public domain
  * BlankMap-Africa.svg: public domain
  * Blank_map_of_Europe_cropped: CC Attribution-Share Alike 2.5 Generic (https://creativecommons.org/licenses/by-sa/2.5/deed.en); map by Maix based on work by Julio Reis
+ * Greater London constituency map (blank) simple.svg: based on Greater London UK constituency map (blank).svg, CC Attribution-Share Alike 3.0 Unported, which contains Ordnance Survey data (c) Crown copyright and database right
 
 ### Colorbrewer
 
