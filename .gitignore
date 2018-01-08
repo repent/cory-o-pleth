@@ -6,3 +6,4 @@
 *.css
 untracked
 .~*
+.ruby-version
