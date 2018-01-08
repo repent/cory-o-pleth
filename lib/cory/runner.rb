@@ -9,12 +9,10 @@ require_relative 'colorbrewer'
 require_relative 'data_catalog'
 require_relative 'indicators'
 #require_relative 'datapoint'
+require_relative 'legend'
 require 'csv'
 require 'pry'
 require 'ap'
-
-# Bugs
-# * For some reason Ukraine isn't shaded!
 
 module Cory
   class Runner
@@ -37,6 +35,10 @@ module Cory
       log.debug "Source: #{@options.source}"
 
       unrecognised = []
+
+      #######################
+      # Put data into order #
+      #######################
 
       # Importing statistics that will be the basis of country colours
       data = case @options.source
@@ -70,6 +72,7 @@ module Cory
       circles = @options.circles ? "opacity: 1;" : ""
 
 
+      # Use the colour rule to construct CSS
 
       case @options.colour_rule
         # Sort data points into n baskets, each containing a similar number, and colour each
@@ -129,12 +132,15 @@ STATIC_CSS
       output = File.new(@options.output, 'w')
       
       source.each do |l|
-        if l =~ /^INJECT-CSS/i
+        if l =~ /^\/\* INJECT-CSS \*\//i
           css.each do |m|
             output.puts m
           end
         elsif l =~ /World Map/
           output.puts l.sub(/World Map/, @options.title)
+        elsif l =~ /<!-- INJECT-LEGEND -->/i
+          legend = Legend.new(@options, basket)
+          output.puts legend.to_s
         else
           output.puts l
         end

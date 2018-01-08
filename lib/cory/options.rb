@@ -16,6 +16,8 @@ module Cory
 
       # Display options
       @circles = true
+      # Display a legend (key)
+      @legend = false
       # Interpolate selects the closest colour from a pseudo-linear scale
       # Basket arranges data points into baskets which are all marked with the same colour
       @colour_rule = :interpolate # c.f. basket
@@ -84,6 +86,7 @@ module Cory
         opts.on('-h', '--help', 'Print this help') { puts opts; exit }
         opts.on('-H', '--header', 'Ignore first line of CSV input') { @header_row = true }
         opts.on('-i', '--input FILE', 'Take choropleth data from FILE (a CSV file)') { |f| @input_data = f }
+        opts.on('-k', '--key', 'Add a key (legend) to the output SVG') { @legend = true }
         opts.on('-l', '--log LEVEL', 'Set log level (from debug, info, warn, error, fatal)') do |level|
           log.level = case level
             when 'debug', 4
