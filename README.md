@@ -2,6 +2,10 @@
 
 A command-line tool for converting csv data into choropleth maps.
 
+## Installation
+
+    gem install i18n awesome_print pry
+
 ## Usage
 
     Usage: ruby -I lib bin/cory [options] output
