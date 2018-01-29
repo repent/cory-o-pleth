@@ -4,7 +4,7 @@ require 'ostruct'
 module Cory
   class Options
     include Logging
-    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :header_row, :logfile, :wb_indicator, :wb_year, :source, :title, :print_discards
+    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :header_row, :logfile, :wb_indicator, :wb_year, :source, :title, :print_discards, :normalise, :normalisation_data, :normalisation_year, :normalisation_data_headers
 
     def initialize(argv)
       @verbose = false
@@ -44,7 +44,13 @@ module Cory
       @country_data = 'data/country-codes.csv'
       @output = 'output.svg'
       @map = 'maps/BlankMap-World6-cory.svg'
+      @normalisation_data = 'normalise'
+      @normalisation_data_headers = true
       #@map = 'maps/BlankMap-World8-cory.svg'
+
+      # Normalisation
+      @normalise = false # :population, :area, :gpp
+      @normalisation_year = :latest
       
       ###############################
       ###############################
@@ -103,6 +109,15 @@ module Cory
         opts.on('-L', '--logfile FILE', 'Log to FILE instead of standard error') { |f| log.reopen(f) }
         opts.on('-m', '--map FILE', 'Map file (must have tag indicating where to insert CSS)') { |m| @map = m }
         opts.on('-n', '--colour-levels N', 'Number of colour levels to use (more important when used with -b) -- the options available are limited by your chosen palette (-p)') { |n| @palette_size = n }
+        opts.on('-N', '--normalise [FACTOR]', 'Normalise your data by FACTOR') do |f|
+          if ['population', 'gdp', 'area'].include? f.downcase.strip
+            @normalise = f.downcase.strip.to_sym
+          else
+            log.fatal "Invalid normalisatoin option: #{f}"
+            puts "Don't know how to normalise by #{f}"
+            exit
+          end
+        end
         opts.on('-p', '--palette PALETTE', 'Palette (set of colours) to use (must be one of available options)') { |set| @palette = set.to_sym }
         opts.on('-R', '--reverse', 'Reverse palette') { @reverse = true; log.debug "Reversing colours" }
         opts.on('-t', '--title TITLE', 'Set a title for the graph') { |t| @title = t }
