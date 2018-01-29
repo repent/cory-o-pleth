@@ -43,6 +43,7 @@ module Cory
       result = data.collect { |d| [ d[0], colour_of(d[0]) ] }
     end
 
+    # Cruft:
     def %(data)
       data.sort! { |x,y| x[1] <=> y[1] }
       result = []
