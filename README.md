@@ -9,7 +9,7 @@ A command-line tool for converting csv data into choropleth maps.
 ## Usage
 
     Usage: ruby -I lib bin/cory [options] output
-        -b, --basket                     Group countries into discrete baskets (default: linear-ish     interpolation, see docs)
+        -b, --basket                     Group countries into discrete baskets (default: linear-ish interpolation, see docs)
         -c, --countries FILE             Take country name data from FILE (a CSV file)
         -d, --print-discards             Print country names that aren's matched
         -h, --help                       Print this help
@@ -23,7 +23,7 @@ A command-line tool for converting csv data into choropleth maps.
         -R, --reverse                    Reverse palette
         -v, --verbose                    Display verbose output
         -w, --warn                       Don't overwrite any output files
-        -W, --world-bank [INDICATOR]     Use INDICATOR from the World Bank Development Indicators as     your source
+        -W, --world-bank [INDICATOR]     Use INDICATOR from the World Bank Development Indicators as your source
         -y, --year                       Year of data to select for World Bank queries
 
 For example output, see https://en.wikipedia.org/wiki/File:Doing_business_2017.svg
