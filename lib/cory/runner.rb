@@ -82,7 +82,6 @@ module Cory
             data.compact!
             #normal = CSV.read "#{@options.normalisation_data}/#{@options.normalise.to_s}.csv"
             # Check that all data points can be normalised
-            binding.pry
           end
 
           data

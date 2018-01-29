@@ -6,7 +6,6 @@ module Cory
       begin
         raise "Scale.* requires a populated array (got #{data})" unless data.class == Array and !data.empty?
       rescue => e
-        binding.pry
         ap e.error
         ap e.backtrace
       end
