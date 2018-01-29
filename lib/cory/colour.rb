@@ -38,6 +38,9 @@ module Cory
         binding.pry
       end
     end
+    def to_s
+      "##{to_hex}"
+    end
     def r; @a[0]; end
     def g; @a[1]; end
     def b; @a[2]; end

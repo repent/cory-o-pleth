@@ -75,10 +75,10 @@ module Cory
         # Sort data points into n baskets, each containing a similar number, and colour each
         # basket according to a colour explicitly defined in PALETTE
         when :basket
-          basket = Basket.import(@options.palette, @options.palette_size)
-          basket.reverse! if @options.reverse
+          @baskets = Baskets.import(@options.palette, @options.palette_size)
+          @baskets.reverse! if @options.reverse
 
-          colour_array = basket * data
+          colour_array = @baskets * data
           colour_array.each do |c|
             #next unless countries.has? c[0]
             css.push ".#{countries.translate(c[0])} { fill: ##{c[1].to_hex}; #{circles} }"
@@ -143,6 +143,11 @@ STATIC_CSS
         raise "Unavailable option" if @options.source == :wb
         puts "\nThese countries weren't recognised:" if unrecognised.length > 0
         unrecognised.each { |u| puts "   #{u[0]}" }
+      end
+
+      if @options.text_legend and (@options.colour_rule == :basket)
+        log.debug "Printing legend"
+        @baskets.print_legend
       end
     end
   end

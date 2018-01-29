@@ -4,7 +4,7 @@ require 'ostruct'
 module Cory
   class Options
     include Logging
-    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :header_row, :logfile, :wb_indicator, :wb_year, :source, :title, :print_discards
+    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :header_row, :logfile, :wb_indicator, :wb_year, :source, :title, :print_discards, :text_legend
 
     def initialize(argv)
       @verbose = false
@@ -23,6 +23,7 @@ module Cory
       @palette = :OrRd
       @palette_size = 3
       @reverse = false
+      @text_legend = true
       
       # Set this true if you don't want to overwrite files without asking
       @becareful = false
