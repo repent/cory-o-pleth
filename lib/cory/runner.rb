@@ -25,13 +25,21 @@ module Cory
 
     def run
       #i=Indicators.new
-      #binding.pry
       # Importing Country Data
       # This is not user-editable
       log.debug "Area names: #{@options.country_data}"
       country_data = CSV.read(@options.country_data)
       country_data.shift # ditch header
       countries = Countries.new(country_data)
+      if @options.normalise
+        norm_file = "#{@options.normalisation_data}/#{@options.normalise}.csv"
+        begin
+          countries.normalise(norm_file, @options.normalisation_data_headers)
+        rescue Errno::ENOENT
+          log.fatal "Could not find normalisation file #{norm_file}"
+          exit
+        end
+      end
       # End of Country Data
 
       log.debug "Source: #{@options.source}"
@@ -55,6 +63,28 @@ module Cory
           # Convert numerical data to floating point (will start off as text if from CSV)
           data = data.collect { |d| d[1] = d[1].to_f; d }
           # End of Data Cleaning
+
+          # Normalisation
+          if @options.normalise
+            # Replace data with normalised data
+            data = data.collect do |name,data_point|
+              country = countries.get(name.to_s)
+              if country.normaliser and country.normaliser != 0.0
+                data_point = data_point / country.normaliser
+                binding.pry if data_point == Float::INFINITY
+                [name,data_point]
+              else
+                log.error "Couldn't normalise #{name} [normalising by #{@options.normalise}, normaliser #{country.normaliser.to_s}] -- dropping this datapoint"
+                nil
+              end
+            end
+            # Drop values set to nil above
+            data.compact!
+            #normal = CSV.read "#{@options.normalisation_data}/#{@options.normalise.to_s}.csv"
+            # Check that all data points can be normalised
+          end
+
+          data
 
         when :wb
           log.debug "Downloading source data from World Bank"
