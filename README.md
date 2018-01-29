@@ -40,6 +40,14 @@ Command:
 
     ruby -I lib bin/cory -b -n 7 -i stats/africa_visa_openness_2016.csv -m maps/BlankMap-Africa-cory.svg -p RdYlGn africa_visa_openness_2016.svg
 
+### Direct use of WB data
+
+You can query the World Bank's Development Indicator API directly to skip downloading source data.
+
+For instance, to show countries' populations in seven baskets:
+
+    ruby -I lib bin/cory -b -p Blues -n 7 -W SP.POP.TOTL population-map.svg
+
 ## Contributions and licensing
 
 ### Cory O'Pleth
