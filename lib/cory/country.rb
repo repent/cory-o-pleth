@@ -38,7 +38,7 @@ module Cory
   end
   
   class Countries
-    #include Logging
+    include Logging
     def initialize(cd)
       @countries = cd.collect { |i| Country.new(i) }
       @missing = Logger.new('log/country_names_not_found.log')

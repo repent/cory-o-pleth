@@ -1,5 +1,7 @@
 require 'logger'
 
+# Add "include Logging" to classes whenever you want to log from them
+
 module Cory
   module Logging
     # This is the magical bit that gets mixed into your classes
