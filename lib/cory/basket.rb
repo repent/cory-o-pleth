@@ -63,14 +63,16 @@ module Cory
     end
 
     def print_legend
+      str = ''
       @baskets.each do |b|
-        puts "#{f(b.lower)} --- #{f(b.upper)}   #{b.colour}   [#{b.countries.length} countries]"
+        str << "#{f(b.lower)} --- #{f(b.upper)}   #{b.colour}   [#{b.countries.length} countries]" << "\n"
       end
+      str
     end
 
-    def text_legend # dump legend info
-
-    end
+    #def text_legend # dump legend info
+    #
+    #end
 
     private
 

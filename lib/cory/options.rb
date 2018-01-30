@@ -23,8 +23,8 @@ module Cory
       @palette = :OrRd
       @palette_size = 3
       @reverse = false
-      @text_legend = true
-      
+      @text_legend = :file
+
       # Set this true if you don't want to overwrite files without asking
       @becareful = false
       log.level = Logger::DEBUG
@@ -77,6 +77,10 @@ module Cory
     #colours = ['#edf8b1','#7fcdbb','#2c7fb8']
     
     #log.debug("Parsing options")
+
+    def legend_file
+      @output.gsub /\.svg$/, '.txt'
+    end
     
     private
 

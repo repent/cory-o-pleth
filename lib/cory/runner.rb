@@ -180,8 +180,20 @@ STATIC_CSS
       end
 
       if @options.text_legend and (@options.colour_rule == :basket)
-        log.debug "Printing legend"
-        @baskets.print_legend
+        if @options.text_legend == :file
+          # Dump to file
+          if File.exist? @options.legend_file and @options.becareful
+            puts "#{@options.legend_file} already exists and 'warn' option has been set, exiting"
+            exit 1
+          end
+          log.warn "Overwriting #{@options.legend_file}"
+          legend = File.open(@options.legend_file, 'w')
+          legend << @baskets.print_legend
+          legend.close
+        else
+          log.debug "Printing legend"
+          print @baskets.print_legend
+        end
       end
     end
   end
