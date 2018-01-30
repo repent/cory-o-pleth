@@ -4,7 +4,7 @@ require 'ostruct'
 module Cory
   class Options
     include Logging
-    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :header_row, :logfile, :wb_indicator, :wb_year, :source, :title, :print_discards, :text_legend, :normalise, :normalisation_data, :normalisation_year, :normalisation_data_headers
+    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :header_row, :logfile, :wb_indicator, :wb_year, :source, :title, :print_discards, :text_legend, :normalise, :normalisation_data, :normalisation_year, :normalisation_data_headers, :no_data_colour
 
     def initialize(argv)
       @verbose = false
@@ -24,6 +24,7 @@ module Cory
       @palette_size = 3
       @reverse = false
       @text_legend = :file
+      @no_data_colour = 'e0e0e0'
 
       # Set this true if you don't want to overwrite files without asking
       @becareful = false
@@ -89,6 +90,10 @@ module Cory
         opts.banner = "Usage: #{$0} [options] output"
         
         opts.on('-b', '--basket', 'Group countries into discrete baskets (default: linear-ish interpolation, see docs)') { @colour_rule = :basket }
+        opts.on('-B', '--blank-colour COLOUR', 'Set colour of countries with no data to the hex COLOUR (default is e0e0e0)') do |c|
+          log.debug "Setting colour for countries with no data to ##{c.strip}"
+          @no_data_colour = c.strip
+        end
         opts.on('-c', '--countries FILE', 'Take country name data from FILE (a CSV file)') { |f| @country_data = f }
         #opts.on('--list-colours', 'List available colour sets') { }
         opts.on('-d', '--print-discards', "Print country names that aren's matched") { @print_discards = true }

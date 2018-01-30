@@ -96,7 +96,10 @@ module Cory
       end
 
 
-      css = []
+      css = [ "\n",
+        ".landxx { fill: ##{@options.no_data_colour}; }",
+        "\n" ]
+
       circles = @options.circles ? "opacity: 1;" : ""
 
 
