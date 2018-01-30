@@ -64,7 +64,7 @@ module Cory
 
     def print_legend
       @baskets.each do |b|
-        puts "#{b.lower}-#{b.upper}   #{b.colour}   [#{b.countries.length} countries]"
+        puts "#{f(b.lower)} --- #{f(b.upper)}   #{b.colour}   [#{b.countries.length} countries]"
       end
     end
 
@@ -74,6 +74,9 @@ module Cory
 
     private
 
+    def f(x) # print a float
+      sprintf("%.2e", x).gsub("e", " e")
+    end
     def colour_of(country)
       raise "Baskets uninitialized" unless @baskets
       @baskets.each do |b|

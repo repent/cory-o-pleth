@@ -106,7 +106,11 @@ module Cory
         # basket according to a colour explicitly defined in PALETTE
         when :basket
           @baskets = Baskets.import(@options.palette, @options.palette_size)
-          @baskets.reverse! if @options.reverse
+          # Since rewriting the basket code to output a legend, the colours get reversed.
+          # I'm not sure if there is really a "logical" way around embedded in the colour data
+          # or not, so not sure if this is an error or just an arbitrary result.  So kludging
+          # it here and moving on, woop [unless instead of if].
+          @baskets.reverse! unless @options.reverse
 
           colour_array = @baskets * data
           colour_array.each do |c|
