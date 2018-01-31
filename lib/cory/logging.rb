@@ -1,6 +1,7 @@
 require 'logger'
 
 # Add "include Logging" to classes whenever you want to log from them
+# Then access as log.warn etc
 
 module Cory
   module Logging

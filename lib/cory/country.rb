@@ -47,13 +47,15 @@ module Cory
     include Logging
     def initialize(cd)
       @countries = cd.collect { |i| Country.new(i) }
-      @missing = Logger.new('log/country_names_not_found.log')
+      # Don't remember the rationale for sticking this in a different log, better just to output it
+      # with everything else.
+      #@missing = Logger.new('log/country_names_not_found.log')
     end
     def translate(name)
       @countries.each do |c|
         return c.to_s if c.match? name
       end
-      @missing.warn(name)
+      log.warn("Do not recognise country in source data: #{name} (dropping this data point!)")
       false
     end
     def has?(country)
@@ -83,8 +85,7 @@ module Cory
       end
       unnormalised = @countries.select { |c| !c.normaliser }
       unless unnormalised.empty?
-        puts "Unnormalised countries:"
-        unnormalised.each { |c| puts "  #{c.name}"}
+        log.info "Countries that are recognisable to Cory but don't have normalisation data:" + unnormalised.collect { |c| "#{c.name}" }.join(', ')
       end
     end
   end
