@@ -12,7 +12,7 @@ module Cory
     #
     # Methods
     # 
-    # find(string)
+    # search(string) # find() reserved for Enumerable
     #
     # private
     # 
@@ -31,7 +31,9 @@ module Cory
       if @options.normalise then normalise else dont_normalise end
       load_data
     end
-    def find(string) # fetch country object
+    # find is an automatic function in Enumerable
+    def search(string) # fetch country object
+      string.strip!
       @countries.each { |c| return c if c == string }
       nil
     end
@@ -45,8 +47,7 @@ module Cory
     def normalise # using normalisation data in CSV in options
       log.debug "Normalising countries from CSV file"
       CSV.read("#{@options.normalisation_data}/#{@options.normalise}.csv", headers: @options.normalisation_data_header).each do |country_code, normalisation_number|
-          find(country_code).normaliser = normalisation_number.to_f
-        end
+        search(country_code).normaliser = normalisation_number.to_f
       end
     end
     def dont_normalise
@@ -57,62 +58,36 @@ module Cory
       # TODO: load data from WB
       @unrecognised_country_names = []
       CSV.read(@options.input_data, headers: @options.input_data_header).each do |row|
-        country_name, data_point = row[0].strip, row[1].strip # Ignore subsequent rows
-        unless data_point.numeric?
-          log.warn "Discarding non numeric data (#{data_point}) for #{country_name}"
+        # Could be nil at this point
+        country_name, data_point = row.slice(0,2) # Ignore subsequent rows
+        unless data_point and data_point.numeric?
+          log.warn "Discarding non numeric data (#{data_point}) for '#{country_name}'"
           next
         end
         # Check that we understand the country given
-        country = @countries.find country_name
+        country = search country_name
         unless country
-          log.warn "I have not heard of a country called #{country_name}, so I'm ignoring it"
+          log.warn "I have not heard of a country called '#{country_name}', so I'm ignoring it"
           @unrecognised_country_names.push country_name
           next
         end
         # Add data to country objects
         country.raw_data = data_point.to_f
       end
+    end
 
     # Junk no longer needed
 
-    def translate(name)
-      raise "Deprecated"
-      @countries.each do |c|
-        return c.to_s if c.match? name
-      end
-      log.warn("Do not recognise country in source data: #{name} (dropping this data point!)")
-      false
-    end
-    #def has?(country)
-    #  translate(country) ? true : false
-    #end
-
-    # Set @normaliser for each Country
-    # DEPRECATED?
-    #def normalise(file, headers=false)
+    #def translate(name)
     #  raise "Deprecated"
-    #  normal_data = CSV.read file, headers: headers
-    #  normal_data.each do |row|
-    #    # row is a CSV object, not an array
-    #    name,data = row[0],row[1]
-    #    country = get(name)
-    #    if country
-    #      #binding.pry
-    #      country.normaliser = data.to_f
-    #    else
-    #      # We have normalisation data for a country not in the dataset:
-    #      # this is completely normal and almost certainly not noteworthy
-    #      # We do NOT catch countries that haven't been normalised here
-    #      #puts "No data to normalise #{name}"
-    #      #log.debug "No data to normalise #{name}"
-    #    end
+    #  @countries.each do |c|
+    #    return c.to_s if c.match? name
     #  end
-    #  unnormalised = @countries.select { |c| !c.normaliser }
-    #  unless unnormalised.empty?
-    #    log.info "Countries that are recognisable to Cory but don't have normalisation data:" + unnormalised#.collect { |c| "#{c.name}" }.join(', ')
-    #  end
+    #  log.warn("Do not recognise country in source data: '#{name}' (dropping this data point!)")
+    #  false
     #end
   end
+
   class Country
     include Logging
     ##################################################################################
@@ -150,13 +125,18 @@ module Cory
       # store everything except [1] as lower case
       @options = options
       I18n.available_locales = [:en]
+      # Gotcha:
+      # If country-codes.csv has a header, this will be a hashlike CSV object
+      # If country-codes.csv doesn't have a header, csv will be a simple array
+      # So, convert to an array if necessary
+      if csv.is_a? CSV::Row then csv = csv.collect{ |i| i[1] } end
       @short_name = csv.shift
       @alpha_2 = csv.shift
       @alpha_3 = csv.shift
       @numerical = csv.shift
       # other_synonyms are not stored in a human-readable format, and are for matching only
       # nil.to_s == ''
-      @other_synonyms = csv.reject { |e| e.to_s.empty? }.collect { |e| clean(e) } + clean(@short_name)
+      @other_synonyms = csv.reject { |e| e.to_s.empty? }.collect { |e| clean(e) } + [ clean(@short_name) ]
       # Arguably don't need @short_name but something has probably gone wront if it's not there
       raise "Insufficient data in country name file" unless @short_name and @alpha_2
       @raw_data = nil
@@ -166,9 +146,7 @@ module Cory
     #def add(synonym)
     #  @synonyms = @synonyms + [ clean(synonym) ].flatten
     #end
-    def to_s
-      @short_name
-    end
+    def to_s; @short_name; end
     alias_method :name, :to_s
     def ==(other)
       # duck type: does it match other.to_s
