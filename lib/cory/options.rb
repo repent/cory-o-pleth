@@ -4,7 +4,7 @@ require 'ostruct'
 module Cory
   class Options
     include Logging
-    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :header_row, :logfile, :wb_indicator, :wb_year, :source, :title, :print_discards, :text_legend, :normalise, :normalisation_data, :normalisation_year, :normalisation_data_headers, :no_data_colour
+    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :header_row, :logfile, :wb_indicator, :wb_year, :source, :title, :print_discards, :text_legend, :normalise, :normalisation_data, :normalisation_year, :normalisation_data_headers, :normalised_data_log, :no_data_colour
 
     def initialize(argv)
       @verbose = false
@@ -48,6 +48,7 @@ module Cory
       @map = 'maps/BlankMap-World6-cory.svg'
       @normalisation_data = 'normalise'
       @normalisation_data_headers = true
+      @normalised_data_log = 'normalise/normalised_data.log'
       #@map = 'maps/BlankMap-World8-cory.svg'
 
       # Normalisation

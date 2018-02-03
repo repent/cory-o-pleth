@@ -34,6 +34,7 @@ module Cory
       if @options.normalise
         norm_file = "#{@options.normalisation_data}/#{@options.normalise}.csv"
         begin
+          # Add @normaliser into each country object (doesn't change data)
           countries.normalise(norm_file, @options.normalisation_data_headers)
         rescue Errno::ENOENT
           log.fatal "Could not find normalisation file #{norm_file}"
@@ -64,14 +65,14 @@ module Cory
           data = data.collect { |d| d[1] = d[1].to_f; d }
           # End of Data Cleaning
 
-          # Normalisation
+          # Normalisation -- arguably this should be refactored elsewhere
           if @options.normalise
             # Replace data with normalised data
             data = data.collect do |name,data_point|
               country = countries.get(name.to_s)
               if country.normaliser and country.normaliser != 0.0
                 data_point = data_point / country.normaliser
-                binding.pry if data_point == Float::INFINITY
+                raise "Normalised data is infinity" if data_point == Float::INFINITY
                 [name,data_point]
               else
                 log.error "Couldn't normalise #{name} [normalising by #{@options.normalise}, normaliser #{country.normaliser.to_s}] -- dropping this datapoint"
@@ -82,6 +83,11 @@ module Cory
             data.compact!
             #normal = CSV.read "#{@options.normalisation_data}/#{@options.normalise.to_s}.csv"
             # Check that all data points can be normalised
+
+            # Output normalised data for debugging
+            #CSV.open(@options.normalised_data_log, 'wb') do |csv|
+            #  data.each { |d| csv << d }
+            #end
           end
 
           data
@@ -120,6 +126,26 @@ module Cory
             #next unless countries.has? c[0]
             css.push ".#{countries.translate(c[0])} { fill: ##{c[1].to_hex}; #{circles} }"
           end
+
+          # Output normalised, basketed data
+          CSV.open(@options.normalised_data_log, 'wb') do |csv|
+            n = 1
+            @baskets.each do |basket|
+              # Basket header
+              csv << [ "Basket #{n}: #{basket}" ]
+              basket.countries.each do |c|
+                # These are just country names, not objects
+                # I think this has got too complicated for my tiny brain to comprehend
+                #binding.pry
+                obj = countries.get(c)
+                csv << [ obj.name ]
+                #binding.pry
+              end
+              n += 1
+            end
+            #data.each { |d| csv << d }
+          end
+
 
         # Give each data point its own colour based on its position between the largest
         # and smallest value

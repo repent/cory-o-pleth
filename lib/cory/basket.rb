@@ -20,16 +20,26 @@ module Cory
     def <=>(other)
       self.upper <=> other.upper
     end
+    def to_s
+      "min: #{@lower}, max: #{@upper}, colour: #{@colour}"
+    end
   end
 
   class Baskets < ColourRange
+    include Enumerable
     # @points -- array of Colours, one representing each basket
     #  -- boundaries of each basket
     #  -- number of countries in each basket
+    # @baskets -- array of Basket objects (which contain countries)
 
     #def initialize(colour_array)
     #  @colour_array = colour_array
     #end
+    def each
+      @baskets.each do |b|
+        yield b
+      end
+    end
     def *(data) # return array, each row: country_name, colour (and record baskets!)
       # Sort countries into data order
       data.sort! { |x,y| x[1] <=> y[1] }
