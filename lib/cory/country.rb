@@ -1,4 +1,5 @@
 require 'i18n'
+require 'csv'
 
 module Cory
   class Countries
@@ -8,51 +9,109 @@ module Cory
     # Data structure
     #
     # countries (array)
+    #
+    # Methods
+    # 
+    # find(string)
+    #
+    # private
+    # 
+    # load_data # from CSV
+    # normalise
+    # dont_normalise
+    #
+    # translate() to canonical name?
+    # has?(string) # just use get?
+    # raw
     ##################################################################################
 
-    # Read from CSV?
-    def initialize(cd)
-      @countries = cd.collect { |i| Country.new(i) }
+    def initialize(options)
+      @options = options
+      @countries = CSV.read(@options.country_data, headers: @options.country_data_header).collect { |c| Country.new(c, options) }
+      if @options.normalise then normalise else dont_normalise end
+      load_data
     end
+    def find(string) # fetch country object
+      @countries.each { |c| return c if c == string }
+      nil
+    end
+
+    private
+
+    # Normalisation
+    # -N requests data is normalised (divided) by a factor such as population, area, gdp etc
+    # It is generally (though not always) good practice to normalise data for choropleth maps
+
+    def normalise # using normalisation data in CSV in options
+      log.debug "Normalising countries from CSV file"
+      CSV.read("#{@options.normalisation_data}/#{@options.normalise}.csv", headers: @options.normalisation_data_header).each do |country_code, normalisation_number|
+          find(country_code).normaliser = normalisation_number.to_f
+        end
+      end
+    end
+    def dont_normalise
+      log.debug "Using unnormalised data"
+      @countries.each { |c| c.normaliser = false }
+    end
+    def load_data # from CSV
+      # TODO: load data from WB
+      @unrecognised_country_names = []
+      CSV.read(@options.input_data, headers: @options.input_data_header).each do |row|
+        country_name, data_point = row[0].strip, row[1].strip # Ignore subsequent rows
+        unless data_point.numeric?
+          log.warn "Discarding non numeric data (#{data_point}) for #{country_name}"
+          next
+        end
+        # Check that we understand the country given
+        country = @countries.find country_name
+        unless country
+          log.warn "I have not heard of a country called #{country_name}, so I'm ignoring it"
+          @unrecognised_country_names.push country_name
+          next
+        end
+        # Add data to country objects
+        country.raw_data = data_point.to_f
+      end
+
+    # Junk no longer needed
+
     def translate(name)
+      raise "Deprecated"
       @countries.each do |c|
         return c.to_s if c.match? name
       end
       log.warn("Do not recognise country in source data: #{name} (dropping this data point!)")
       false
     end
-    def has?(country)
-      translate(country) ? true : false
-    end
-    def get(name) # fetch country object
-      @countries.each { |c| return c if c.match? name }
-      #log.warn "#{name} not found"
-      nil
-    end
+    #def has?(country)
+    #  translate(country) ? true : false
+    #end
+
     # Set @normaliser for each Country
     # DEPRECATED?
-    def normalise(file, headers=false)
-      normal_data = CSV.read file, headers: headers
-      normal_data.each do |row|
-        # row is a CSV object, not an array
-        name,data = row[0],row[1]
-        country = get(name)
-        if country
-          #binding.pry
-          country.normaliser = data.to_f
-        else
-          # We have normalisation data for a country not in the dataset:
-          # this is completely normal and almost certainly not noteworthy
-          # We do NOT catch countries that haven't been normalised here
-          #puts "No data to normalise #{name}"
-          #log.debug "No data to normalise #{name}"
-        end
-      end
-      unnormalised = @countries.select { |c| !c.normaliser }
-      unless unnormalised.empty?
-        log.info "Countries that are recognisable to Cory but don't have normalisation data:" + unnormalised.collect { |c| "#{c.name}" }.join(', ')
-      end
-    end
+    #def normalise(file, headers=false)
+    #  raise "Deprecated"
+    #  normal_data = CSV.read file, headers: headers
+    #  normal_data.each do |row|
+    #    # row is a CSV object, not an array
+    #    name,data = row[0],row[1]
+    #    country = get(name)
+    #    if country
+    #      #binding.pry
+    #      country.normaliser = data.to_f
+    #    else
+    #      # We have normalisation data for a country not in the dataset:
+    #      # this is completely normal and almost certainly not noteworthy
+    #      # We do NOT catch countries that haven't been normalised here
+    #      #puts "No data to normalise #{name}"
+    #      #log.debug "No data to normalise #{name}"
+    #    end
+    #  end
+    #  unnormalised = @countries.select { |c| !c.normaliser }
+    #  unless unnormalised.empty?
+    #    log.info "Countries that are recognisable to Cory but don't have normalisation data:" + unnormalised#.collect { |c| "#{c.name}" }.join(', ')
+    #  end
+    #end
   end
   class Country
     include Logging
@@ -81,7 +140,7 @@ module Cory
     #attr_accessor :normaliser
     attr_writer :normaliser, :raw_data
     attr_reader :alpha_2, :numerical
-    def initialize(csv) # first: alpha-2 code, remainder: synonyms
+    def initialize(csv, options) # first: alpha-2 code, remainder: synonyms
       # Format for input array:
       # 1: English short name
       # 2: alpha-2 (needed for map output)
@@ -89,6 +148,7 @@ module Cory
       # 4: numerical
       # 5 onwards: synonyms (first of which usually WBDI name, but don't count on it)
       # store everything except [1] as lower case
+      @options = options
       I18n.available_locales = [:en]
       @short_name = csv.shift
       @alpha_2 = csv.shift

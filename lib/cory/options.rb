@@ -4,7 +4,7 @@ require 'ostruct'
 module Cory
   class Options
     include Logging
-    attr_accessor :verbose, :circles, :input_data, :country_data, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :header_row, :logfile, :wb_indicator, :wb_year, :source, :title, :print_discards, :text_legend, :normalise, :normalisation_data, :normalisation_year, :normalisation_data_headers, :normalised_data_log, :no_data_colour
+    attr_accessor :verbose, :circles, :input_data, :input_data_header, :country_data, :country_data_header, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :logfile, :wb_indicator, :wb_year, :source, :title, :print_discards, :text_legend, :normalise, :normalisation_data, :normalisation_year, :normalisation_data_header, :normalised_data_log, :no_data_colour
 
     def initialize(argv)
       @verbose = false
@@ -34,20 +34,20 @@ module Cory
 
       # Data options
       @source = :file
-      # Is there a header in the CSV statistics file?
-      @header_row = false
       @wb_indicator = 'NV.IND.TOTL.ZS'
       @wb_year = :latest
       @title = "World Map"
       @print_discards = false
 
-      # Default file locations
+      # Default file locations and options
       @input_data = 'stats/data.csv'
+      @input_data_header = false
       @country_data = 'data/country-codes.csv'
+      @country_data_header = true
       @output = 'output.svg'
       @map = 'maps/BlankMap-World6-cory.svg'
       @normalisation_data = 'normalise'
-      @normalisation_data_headers = true
+      @normalisation_data_header = true
       @normalised_data_log = 'normalise/normalised_data.log'
       #@map = 'maps/BlankMap-World8-cory.svg'
 
@@ -99,7 +99,7 @@ module Cory
         #opts.on('--list-colours', 'List available colour sets') { }
         opts.on('-d', '--print-discards', "Print country names that aren's matched") { @print_discards = true }
         opts.on('-h', '--help', 'Print this help') { puts opts; exit }
-        opts.on('-H', '--header', 'Ignore first line of CSV input') { @header_row = true }
+        opts.on('-H', '--header', 'CSV input file contains a header row') { @header_row = true }
         opts.on('-i', '--input FILE', 'Take choropleth data from FILE (a CSV file)') { |f| @input_data = f }
         opts.on('-l', '--log LEVEL', 'Set log level (from debug, info, warn, error, fatal)') do |level|
           log.level = case level
