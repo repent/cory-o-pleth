@@ -9,7 +9,7 @@ require_relative 'colorbrewer'
 require_relative 'data_catalog'
 require_relative 'indicators'
 require_relative 'string'
-require_relative 'dataset'
+#require_relative 'dataset'
 #require_relative 'datapoint'
 require 'csv'
 require 'pry'
@@ -96,6 +96,7 @@ module Cory
       #    # Data Cleaning for WB done in class
       #end
 
+      exit
 
       css = [ "\n",
         ".landxx { fill: ##{@options.no_data_colour}; }",
