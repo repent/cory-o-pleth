@@ -2,6 +2,7 @@
 *.xlsx
 *.ods
 *.csv
+!data/*.csv
 *.log
 *.css
 untracked
