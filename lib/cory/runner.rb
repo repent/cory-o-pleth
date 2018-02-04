@@ -96,56 +96,64 @@ module Cory
       #    # Data Cleaning for WB done in class
       #end
 
-      exit
-
       css = [ "\n",
         ".landxx { fill: ##{@options.no_data_colour}; }",
         "\n" ]
 
-      circles = @options.circles ? "opacity: 1;" : ""
+      #circles = @options.circles ? "opacity: 1;" : ""
 
 
 
       case @options.colour_rule
+
         # Sort data points into n baskets, each containing a similar number, and colour each
         # basket according to a colour explicitly defined in PALETTE
         when :basket
-          @baskets = Baskets.import(@options.palette, @options.palette_size)
+          # #import pulls in data on colours
+          @baskets = Baskets.import(@options)
           # Since rewriting the basket code to output a legend, the colours get reversed.
           # I'm not sure if there is really a "logical" way around embedded in the colour data
           # or not, so not sure if this is an error or just an arbitrary result.  So kludging
           # it here and moving on, woop [unless instead of if].
           @baskets.reverse! unless @options.reverse
 
-          colour_array = @baskets * data
-          colour_array.each do |c|
-            #next unless countries.has? c[0]
-            css.push ".#{countries.translate(c[0])} { fill: ##{c[1].to_hex}; #{circles} }"
-          end
+          # Distribute countries into baskets
+          @baskets.fill(@countries)
 
-          # Output normalised, basketed data
-          CSV.open(@options.normalised_data_log, 'wb') do |csv|
-            n = 1
-            @baskets.each do |basket|
-              # Basket header
-              csv << [ "Basket #{n}: #{basket}" ]
-              basket.countries.each do |c|
-                # These are just country names, not objects
-                # I think this has got too complicated for my tiny brain to comprehend
-                #binding.pry
-                obj = countries.get(c)
-                csv << [ obj.name ]
-                #binding.pry
-              end
-              n += 1
-            end
-            #data.each { |d| csv << d }
-          end
+          css << @baskets.to_css
+
+          # Output normalised, basketed data to CSV for error-checking
+          @baskets.to_csv
+
+          #colour_array = @baskets * data
+          #colour_array.each do |c|
+          #  #next unless countries.has? c[0]
+          #  css.push ".#{countries.translate(c[0])} { fill: ##{c[1].to_hex}; #{circles} }"
+          #end
+
+          #CSV.open(@options.normalised_data_log, 'wb') do |csv|
+          #  n = 1
+          #  @baskets.each do |basket|
+          #    # Basket header
+          #    csv << [ "Basket #{n}: #{basket}" ]
+          #    basket.countries.each do |c|
+          #      # These are just country names, not objects
+          #      # I think this has got too complicated for my tiny brain to comprehend
+          #      #binding.pry
+          #      obj = countries.get(c)
+          #      csv << [ obj.name ]
+          #      #binding.pry
+          #    end
+          #    n += 1
+          #  end
+          #  #data.each { |d| csv << d }
+          #end
 
 
         # Give each data point its own colour based on its position between the largest
         # and smallest value
         when :interpolate
+          raise "This won't work."
           scale = Scale.import(@options.palette, @options.palette_size)
           scale.reverse! if @options.reverse
 

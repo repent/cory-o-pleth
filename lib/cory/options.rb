@@ -83,6 +83,10 @@ module Cory
     def legend_file
       @output.gsub /\.svg$/, '.txt'
     end
+
+    def circles_css
+      circles ? "opacity: 1;" : ""
+    end
     
     private
 

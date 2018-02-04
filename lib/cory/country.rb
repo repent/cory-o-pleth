@@ -37,6 +37,7 @@ module Cory
       @countries.each { |c| return c if c == string }
       nil
     end
+    def sort!; @countries.sort!; end
 
     private
 
@@ -90,6 +91,7 @@ module Cory
 
   class Country
     include Logging
+    include Comparable
     ##################################################################################
     # Data structure:
 
