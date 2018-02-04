@@ -50,6 +50,27 @@ module Cory
     def compact!
       @countries = @countries.select { |c| c.to_f != nil }
     end
+    # sizes is an array of sizes of each slice that should be returned
+    # the sum of all sizes must equal the length of the array.
+    #
+    # E.g.
+    # a = 1.upto(10).to_a
+    # => [1,2,3,4,5,6,7,8,9,10]
+    # a.into_slices [ 3, 4, 3 ]
+    # => [ [1,2,3],
+    #      [4,5,6,7],
+    #      [8,9,10]
+    #    ]
+    def into_slices(sizes)
+      raise "Incorrect number of slices" unless @countries.length == sizes.inject(0, :+)
+      slices = []
+      start = 0
+      sizes.each do |size|
+        slices.push @countries.slice(start, size)
+        start += size
+      end
+      slices
+    end
 
     private
 
@@ -180,6 +201,9 @@ module Cory
       else
         @raw_data
       end
+    end
+    def to_csv
+      [ "  #{@short_name}" , data_point ]
     end
     alias_method :to_f, :data_point
 

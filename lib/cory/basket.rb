@@ -7,7 +7,6 @@ module Cory
     attr_accessor :countries, :colour
     def initialize(countries, colour, options)
       #data = data_slice.collect { |d| d[1] }
-      binding.pry
       @countries = countries
       @colour = colour
       @options = options
@@ -19,7 +18,7 @@ module Cory
     # Enumerable requirement
     def each; @countries.each { |c| yield c }; end
     # Other
-    def to_s; "min: #{@lower}, max: #{@upper}, colour: #{@colour}"; end
+    def to_s; "min: #{min}, max: #{max}, colour: #{@colour}, contents: #{@countries.length}"; end
     def max; @countries.max.data_point; end
     def min; @countries.min.data_point; end
     def to_css
@@ -31,7 +30,7 @@ module Cory
     end
     def to_csv(csv)
       @countries.each do |country|
-        csv << %Q["country.to_s"] << country.data_point
+        csv << country.to_csv #[ %Q["country.to_s"] , country.data_point ]
       end
     end
   end
@@ -67,7 +66,7 @@ module Cory
       @baskets = []
       # Put countries into baskets
       # Array#into_slices is not standard Ruby
-      countries.into_slices(basket_sizes).each_with_index do |slice, index|
+      countries.into_slices(basket_sizes(countries.length)).each_with_index do |slice, index|
         @baskets.push Basket.new slice, @points[index], @options
       end
     end
@@ -82,10 +81,11 @@ module Cory
     end
 
     def to_csv
+      # TODO: Ratoinalise the format of to_csv across objects (who should know about the actual file?)
       n = 0
       CSV.open(@options.normalised_data_log, 'wb') do |csv|
-        csv << %Q["Basket #{n+=1}: #{basket}"]
         @baskets.each do |basket|
+          csv << [ "Basket #{n+=1}: #{basket}" ]
           basket.to_csv(csv)
         end
       end
@@ -94,7 +94,7 @@ module Cory
     def print_legend
       str = ''
       @baskets.each do |b|
-        str << "#{f(b.lower)} --- #{f(b.upper)}   #{b.colour}   [#{b.countries.length} countries]" << "\n"
+        str << "#{f(b.min)} --- #{f(b.max)}   #{b.colour}   [#{b.countries.length} countries]" << "\n"
       end
       str
     end
@@ -124,9 +124,9 @@ module Cory
     end
     # Return sizes of each basket when given a number of baskets and a number of countries to put in them
     # e.g. 10 countries in 3 baskets => [ 3, 4, 3 ]
-    def basket_sizes(n_data_points)
-      result = Array.new(n_baskets, n_data_points / n_baskets) # will round down
-      remainder = n_data_points % n_baskets
+    def basket_sizes(n_countries)
+      result = Array.new(n_baskets, n_countries / n_baskets) # will round down
+      remainder = n_countries % n_baskets
       start_point = (n_baskets - remainder) / 2
       start_point.upto(start_point+remainder-1) { |n| result[n] += 1 }
       log.debug "Basket sizes: #{result}"
