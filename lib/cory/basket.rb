@@ -4,9 +4,10 @@ module Cory
   class Basket
     include Comparable
     include Enumerable
-    attr_accessor :countries, :colour, :upper, :lower
+    attr_accessor :countries, :colour
     def initialize(countries, colour, options)
       #data = data_slice.collect { |d| d[1] }
+      binding.pry
       @countries = countries
       @colour = colour
       @options = options
@@ -38,8 +39,6 @@ module Cory
   class Baskets < ColourRange
     include Enumerable
     # @points -- array of Colours, one representing each basket
-    #  -- boundaries of each basket
-    #  -- number of countries in each basket
     # @baskets -- array of Basket objects (which contain countries)
 
     # Methods
@@ -51,7 +50,7 @@ module Cory
 
     # Enumerable requirement
     def each
-      @baskets.each { |b| yield b } end
+      @baskets.each { |b| yield b }
     end
 
     # Distribute a set of countries among a set of baskets
@@ -60,7 +59,10 @@ module Cory
       #   @points tells us the number of baskets
       #   countries contains statistical data
 
+      # Clean up countries
+      countries.compact! # ditch countries without data (they are only shells to parse incoming data)
       countries.sort! # according to the countries' data points
+      
       # Create baskets
       @baskets = []
       # Put countries into baskets
@@ -88,46 +90,6 @@ module Cory
         end
       end
     end
-
-    #def print_all
-    #  all = ""
-    #  @baskets.each do |b|
-    #    all << b.to_s << "\n"
-    #  end
-    #end
-
-    # More cruft:
-    #def *(data) # return array, each row: country_name, colour (and record baskets!)
-    #  # Sort countries into data order
-    #  data.sort! { |x,y| x[1] <=> y[1] }
-    #  # @basket: array of Basket objects
-    #  # Iterate over data, placing each country into a basket
-    #  points = @points.dup
-    #  @baskets = []
-    #  basket_ranges(data.length).each do |range|
-    #    @baskets.push Basket.new data.slice(range), points.pop
-    #  end
-    #  result = data.collect { |d| [ d[0], colour_of(d[0]) ] }
-    #end
-#
-    ## Cruft:
-    #def %(data)
-    #  data.sort! { |x,y| x[1] <=> y[1] }
-    #  result = []
-    #  colour_index=0
-    #  j,k=0,0
-    #  basket_sizes_array = basket_sizes(data.length)
-    #  data.each_with_index do |d,i|
-    #    result[i] = [ d[0], Colour.new(@points[colour_index]) ]
-    #    j += 1
-    #    if j == basket_sizes_array[k]
-    #      colour_index += 1
-    #      j=0
-    #      k+=1
-    #    end
-    #  end
-    #  result # Array, each line [ 'country_name', Colour ]
-    #end
 
     def print_legend
       str = ''

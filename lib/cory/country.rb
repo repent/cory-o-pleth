@@ -29,7 +29,14 @@ module Cory
       @options = options
       @countries = CSV.read(@options.country_data, headers: @options.country_data_header).collect { |c| Country.new(c, options) }
       if @options.normalise then normalise else dont_normalise end
-      load_data
+      case @options.source
+      when :file
+        load_data_from_csv
+      when :wb
+        raise "Not written yet."
+      else
+        raise "Unknown source."
+      end
     end
     # find is an automatic function in Enumerable
     def search(string) # fetch country object
@@ -38,6 +45,11 @@ module Cory
       nil
     end
     def sort!; @countries.sort!; end
+    def length; @countries.length; end
+    # Remove countries with no data
+    def compact!
+      @countries = @countries.select { |c| c.to_f != nil }
+    end
 
     private
 
@@ -55,7 +67,7 @@ module Cory
       log.debug "Using unnormalised data"
       @countries.each { |c| c.normaliser = false }
     end
-    def load_data # from CSV
+    def load_data_from_csv
       # TODO: load data from WB
       @unrecognised_country_names = []
       CSV.read(@options.input_data, headers: @options.input_data_header).each do |row|
@@ -155,12 +167,19 @@ module Cory
       match_synonyms.include? clean(other.to_s)
     end
     def <=>(other)
+      raise "Comparing countries with incomplete data" if data_point == nil or other.data_point == nil
       data_point <=> other.to_f
     end
     def data_point
       # Can we check if we are meant to be normalising?
       raise "#{to_s} has not been told whether to normalise data yet" if @normaliser == nil
-      raise "Method not written"
+      #raise "#{to_s} has not been told what its data point is yet" unless @raw_data
+      return nil unless @raw_data
+      if @normaliser
+        @raw_data / @normaliser
+      else
+        @raw_data
+      end
     end
     alias_method :to_f, :data_point
 

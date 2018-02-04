@@ -37,7 +37,7 @@ module Cory
 #
       ## Importing statistics that will be the basis of country colours
       ## Data can be drawn from a CSV file or (maybe) the World Bank database
-      #data = case @options.source
+      #case @options.source
       #  when :file
       #    # TODO: take map title from header row?
       #    #@options.title = "World Map: #{@options.input_data}"
@@ -47,8 +47,8 @@ module Cory
       #    # Data Cleaning for CSV
       #    # select! returns nil if no changes were made, so have to use non-destructive version
 #
-      #    # Puts data into countries
-      #    countries.load_data
+          # Load data into countries
+      #    countries.load_data_from_csv
       #    data = Dataset.new(@options, countries)
 #
       #    # Get rid of later columns and nil values
@@ -118,7 +118,7 @@ module Cory
           @baskets.reverse! unless @options.reverse
 
           # Distribute countries into baskets
-          @baskets.fill(@countries)
+          @baskets.fill(countries)
 
           css << @baskets.to_css
 
