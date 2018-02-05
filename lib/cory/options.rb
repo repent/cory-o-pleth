@@ -44,7 +44,7 @@ module Cory
       @input_data_header = false
       @country_data = 'data/country-codes.csv'
       @country_data_header = true
-      @output = 'output.svg'
+      @output = false
       @map = 'maps/BlankMap-World6-cory.svg'
       @normalisation_data = 'normalise'
       @normalisation_data_header = true
@@ -92,7 +92,7 @@ module Cory
 
     def parse(argv)
       OptionParser.new do |opts|
-        opts.banner = "Usage: #{$0} [options] output"
+        opts.banner = "Usage: #{$0} [options] input"
         
         opts.on('-b', '--basket', 'Group countries into discrete baskets (default: linear-ish interpolation, see docs)') { @colour_rule = :basket }
         opts.on('-B', '--blank-colour COLOUR', 'Set colour of countries with no data to the hex COLOUR (default is e0e0e0)') do |c|
@@ -104,7 +104,7 @@ module Cory
         opts.on('-d', '--print-discards', "Print country names that aren's matched") { @print_discards = true }
         opts.on('-h', '--help', 'Print this help') { puts opts; exit }
         opts.on('-H', '--header', 'CSV input file contains a header row') { @header_row = true }
-        opts.on('-i', '--input FILE', 'Take choropleth data from FILE (a CSV file)') { |f| @input_data = f }
+        #opts.on('-i', '--input FILE', 'Take choropleth data from FILE (a CSV file)') { |f| @input_data = f }
         opts.on('-l', '--log LEVEL', 'Set log level (from debug, info, warn, error, fatal)') do |level|
           log.level = case level
             when 'debug', 4
@@ -133,6 +133,7 @@ module Cory
             exit
           end
         end
+        opts.on('-o', '--output FILE', 'Output to FILE instead of using the same name as the input with an extension of .svg') { |out| @output.output = out }
         opts.on('-p', '--palette PALETTE', 'Palette (set of colours) to use (must be one of available options)') { |set| @palette = set.to_sym }
         opts.on('-R', '--reverse', 'Reverse palette') { @reverse = true; log.debug "Reversing colours" }
         opts.on('-t', '--title TITLE', 'Set a title for the graph') { |t| @title = t }
@@ -157,7 +158,8 @@ module Cory
           exit 1
         end
       end
-      @output = argv[0] if argv[0]
+      @input_data = argv[0] if argv[0]
+      @output ||= @input.data.sub /\.csv$/i, '.svg'
     end
     
     #log.debug("Started #{$0}")
