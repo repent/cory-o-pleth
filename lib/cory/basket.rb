@@ -24,13 +24,13 @@ module Cory
     def to_css
       css = []
       @countries.each do |country|
-        css << ".#{country.alpha_2} { fill: ##{@colour.to_hex}; #{@options.circles_css} }"
+        css << ".#{country.alpha_2.downcase} { fill: ##{@colour.to_hex}; #{@options.circles_css} }"
       end
       css
     end
-    def to_csv(csv)
+    def data_summary(html)
       @countries.each do |country|
-        csv << country.to_csv #[ %Q["country.to_s"] , country.data_point ]
+        html.puts country.data_summary #[ %Q["country.to_s"] , country.data_point ]
       end
     end
   end
@@ -60,7 +60,8 @@ module Cory
 
       # Clean up countries
       countries.compact! # ditch countries without data (they are only shells to parse incoming data)
-      countries.sort! # according to the countries' data points
+      countries.sort! # according to the countries' data points (low to high)
+      countries.reverse! # I HAVE NO IDEA WHY
       
       # Create baskets
       @baskets = []
@@ -80,13 +81,18 @@ module Cory
       css
     end
 
-    def to_csv
+    def data_summary
       # TODO: Ratoinalise the format of to_csv across objects (who should know about the actual file?)
       n = 0
-      CSV.open(@options.normalised_data_log, 'wb') do |csv|
+      log.info "Writing data to #{@options.normalised_data_log}"
+      File.open(@options.normalised_data_log, 'wt') do |html|
+        html.puts %Q(<html><head><link rel="stylesheet" type="text/css" href="class.css" /></head>)
+        html.puts "<h1>Data summary</h1>"
+        html.puts "<table>"
+        html.puts "<tr><th>Country</th><th>Raw data</th><th>Normaliser</th><th>Mapped result</th></tr>"
         @baskets.each do |basket|
-          csv << [ "Basket #{n+=1}: #{basket}" ]
-          basket.to_csv(csv)
+          html.puts %Q(<tr><th colspan=4 bgcolor="##{basket.colour.to_hex}">Basket #{n+=1}: #{basket}</th></tr>)
+          basket.data_summary(html)
         end
       end
     end

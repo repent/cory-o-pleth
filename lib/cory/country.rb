@@ -50,6 +50,7 @@ module Cory
     def compact!
       @countries = @countries.select { |c| c.to_f != nil }
     end
+    def reverse!; @countries.reverse!; end
     # sizes is an array of sizes of each slice that should be returned
     # the sum of all sizes must equal the length of the array.
     #
@@ -202,8 +203,8 @@ module Cory
         @raw_data
       end
     end
-    def to_csv
-      [ "  #{@short_name}" , data_point ]
+    def data_summary
+      "<tr><td>#{@short_name}</td><td>#{@raw_data}</td><td>#{@normaliser}</td><td>#{data_point}</td></tr>"
     end
     alias_method :to_f, :data_point
 

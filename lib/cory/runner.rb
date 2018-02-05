@@ -122,8 +122,8 @@ module Cory
 
           css << @baskets.to_css
 
-          # Output normalised, basketed data to CSV for error-checking
-          @baskets.to_csv
+          # Output normalised, basketed data to a HTML log for error-checking
+          @baskets.data_summary
 
           #colour_array = @baskets * data
           #colour_array.each do |c|

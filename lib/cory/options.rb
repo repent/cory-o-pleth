@@ -48,7 +48,7 @@ module Cory
       @map = 'maps/BlankMap-World6-cory.svg'
       @normalisation_data = 'normalise'
       @normalisation_data_header = true
-      @normalised_data_log = 'normalise/normalised_data.log'
+      @normalised_data_log = 'normalise/normalised_data.html'
       #@map = 'maps/BlankMap-World8-cory.svg'
 
       # Normalisation
