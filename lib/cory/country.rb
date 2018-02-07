@@ -130,6 +130,11 @@ module Cory
           next
         end
         # Add data to country objects
+        #binding.pry if country.to_s == 'United States of America'
+        if data_point =~ /\,/
+          log.warn "Commas in input data are intepretted as thousand separators (#{country} is listed as #{data_point})"
+          data_point.gsub! ',', ''
+        end
         country.raw_data = data_point.to_f
       end
     end

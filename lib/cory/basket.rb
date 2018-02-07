@@ -1,6 +1,7 @@
 # basket * data_array [name, index] = colour_array [name, hex_colour]
 require_relative 'float'
 require_relative 'legend'
+require 'roundest'
 
 module Cory
   class Basket
@@ -16,7 +17,7 @@ module Cory
       #@lower = data.min
     end
     # Comparable requirement
-    def <=>(other); self.upper <=> other.upper; end
+    def <=>(other); self.max <=> other.max; end
     # Enumerable requirement
     def each; @countries.each { |c| yield c }; end
     # Other
@@ -110,9 +111,92 @@ module Cory
       str
     end
 
-    def svg_legend
-      File.open(@options.svg_legend, 'wt') do |f|
+    def svg_legend(output)
+      ############################################################################
+      # Safe location for legend in Blank World Map 6:
+      # x: 300 to 620 (width 320)
+      # y: 700 to 1250 (height 550)
+      ############################################################################
+      x_side = 50
+      y_side = 30
+      spacing = 10
+      position = 0
+      text_offset = 10 + y_side / 2
+      sup, sub = -10, 10
+      x_pos = 300
+      y_pos = 700
+
+      x_unit_offset = 80
+      y_unit_offset = 30
+
+      legend = Builder::XmlMarkup.new( target: output, indent: 2 )
+      #legend.link rel: 'stylesheet', href: 'css/legend.css', type: 'text/css' 
+      #legend.rect x: 300, y: 700, width: 320, height: 550, fill: 'black'
+      position += y_pos
+      legend.g id: 'legend' do
+        @baskets.each do |basket|
+          legend.rect x: x_pos, y: position, height: y_side, width: x_side, fill: basket.colour, class: 'swatch'
+          legend.text x: x_pos + x_side + spacing, y: position + text_offset, class: 'legend_text' do
+            legend.tspan basket.min.index
+            legend.tspan basket.min.exponent, dy: sup
+            legend.tspan " — #{basket.max.index}", dy: sub
+            legend.tspan basket.max.exponent, dy: sup
+          end
+          position += y_side + spacing
+        end
+        legend.rect x: x_pos, y: position, height: y_side, width: x_side, fill: @options.no_data_colour, class: 'swatch'
+        legend.text x: x_pos + x_side + spacing, y: position + text_offset, class: 'legend_text' do
+          legend.tspan 'no data'
+        end
+        position += y_side + spacing
+        if @options.legend_unit
+          legend.text x: x_pos + x_unit_offset, y: position + y_unit_offset, class: 'legend_unit' do
+            legend.tspan @options.legend_unit
+          end
+        end
       end
+    end
+
+    #def legend_line(colour, text)
+    #def legend_box(position, colour)
+
+    #end
+
+    def svg_legend_test
+      side = 50
+      spacing = 10
+      position = 0
+      text_offset = 30
+
+
+      File.open('svgtest.svg', 'wt') do |svg_legend|
+        legend = Builder::XmlMarkup.new( target: svg_legend, indent: 2 )
+        legend.instruct! :xml, encoding: 'UTF-8', standalone: 'no'
+        #legend << %Q(<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"\n)
+        #legend.html do
+          #legend.meta charset: 'UTF-8'
+          #legend.body do
+            #legend.style type: 'text/css', href: 'css/legend.css'
+            legend.svg version: '1.1', height: '1000', width: '1000', xmlns: "http://www.w3.org/2000/svg" do
+              legend.link rel: 'stylesheet', href: 'css/legend.css', type: 'text/css' 
+              position = 0
+              side, spacing = 50, 10
+              sup, sub = -10, 10
+              @baskets.each do |basket|
+                legend.rect x: 0, y: position, height: side, width: side, fill: basket.colour, class: 'swatch'
+                legend.text x: side + spacing, y: position + text_offset, class: 'legend_text' do
+                  legend.tspan basket.min.index
+                  legend.tspan basket.min.exponent, dy: sup
+                  legend.tspan " — #{basket.max.index}", dy: sub
+                  legend.tspan basket.max.exponent, dy: sup
+                end
+                position += side + spacing
+              end   
+            end
+          #end
+        #end
+      end
+      File.readlines('svgtest.html').each { |l| puts l }
     end
 
     #def text_legend # dump legend info

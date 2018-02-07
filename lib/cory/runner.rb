@@ -126,6 +126,10 @@ module Cory
           # Output normalised, basketed data to a HTML log for error-checking
           @baskets.data_summary
 
+          # Fuck around with an svg legend
+          #@baskets.svg_legend
+          #exit
+
           #colour_array = @baskets * data
           #colour_array.each do |c|
           #  #next unless countries.has? c[0]
@@ -203,6 +207,9 @@ STATIC_CSS
           end
         elsif l =~ /World Map/
           output.puts l.sub(/World Map/, @options.title)
+        elsif l =~ /\<\/svg\>/ and @options.graphical_legend and @options.colour_rule == :basket
+          @baskets.svg_legend(output)
+          output.puts l
         else
           output.puts l
         end

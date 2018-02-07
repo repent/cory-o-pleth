@@ -141,6 +141,16 @@
  *
  */
 
+text {
+  font-family: Arial;
+  font-size: 16pt;
+  color: blue;
+}
+
+text.legend_unit {
+  font-size: 18pt;
+}
+
  /* CSS injected by Cory O'Pleth */
 
 INJECT-CSS
