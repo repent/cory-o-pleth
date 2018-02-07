@@ -118,6 +118,7 @@ module Cory
           @baskets.reverse! unless @options.reverse
 
           # Distribute countries into baskets
+          # Remove countries for which no user data is supplied
           @baskets.fill(countries)
 
           css << @baskets.to_css
@@ -215,12 +216,12 @@ STATIC_CSS
       if @options.text_legend and (@options.colour_rule == :basket)
         if @options.text_legend == :file
           # Dump to file
-          if File.exist? @options.legend_file and @options.becareful
-            puts "#{@options.legend_file} already exists and 'warn' option has been set, exiting"
+          if File.exist? @options.text_legend_file and @options.becareful
+            puts "#{@options.text_legend_file} already exists and 'warn' option has been set, exiting"
             exit 1
           end
-          log.warn "Overwriting #{@options.legend_file}"
-          legend = File.open(@options.legend_file, 'w')
+          log.warn "Overwriting #{@options.text_legend_file}"
+          legend = File.open(@options.text_legend_file, 'w')
           legend << @baskets.print_legend
           legend.close
         else

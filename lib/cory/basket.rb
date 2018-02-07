@@ -1,4 +1,6 @@
 # basket * data_array [name, index] = colour_array [name, hex_colour]
+require_relative 'float'
+require_relative 'legend'
 
 module Cory
   class Basket
@@ -18,7 +20,7 @@ module Cory
     # Enumerable requirement
     def each; @countries.each { |c| yield c }; end
     # Other
-    def to_s; "min: #{min}, max: #{max}, colour: #{@colour}, contents: #{@countries.length}"; end
+    def to_s; "min: #{min.simple}, max: #{max.simple}, colour: #{@colour}, contents: #{@countries.length}"; end
     def max; @countries.max.data_point; end
     def min; @countries.min.data_point; end
     def to_css
@@ -60,6 +62,7 @@ module Cory
 
       # Clean up countries
       countries.compact! # ditch countries without data (they are only shells to parse incoming data)
+      countries.reject! { |c| !c.data_point } # remove countries that don't have a data point
       countries.sort! # according to the countries' data points (low to high)
       countries.reverse! # I HAVE NO IDEA WHY
       
@@ -86,7 +89,9 @@ module Cory
       n = 0
       log.info "Writing data to #{@options.normalised_data_log}"
       File.open(@options.normalised_data_log, 'wt') do |html|
-        html.puts %Q(<html><head><link rel="stylesheet" type="text/css" href="class.css" /></head>)
+        html.puts "<!DOCTYPE HTML>"
+        html.puts %Q(<html><head><link rel="stylesheet" type="text/css" href="class.css" />)
+        html.puts '<meta charset="UTF-8"></head>'
         html.puts "<h1>Data summary</h1>"
         html.puts "<table>"
         html.puts "<tr><th>Country</th><th>Raw data</th><th>Normaliser</th><th>Mapped result</th></tr>"
@@ -103,6 +108,11 @@ module Cory
         str << "#{f(b.min)} --- #{f(b.max)}   #{b.colour}   [#{b.countries.length} countries]" << "\n"
       end
       str
+    end
+
+    def svg_legend
+      File.open(@options.svg_legend, 'wt') do |f|
+      end
     end
 
     #def text_legend # dump legend info

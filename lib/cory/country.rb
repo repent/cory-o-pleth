@@ -41,14 +41,23 @@ module Cory
     # find is an automatic function in Enumerable
     def search(string) # fetch country object
       string.strip!
-      @countries.each { |c| return c if c == string }
+      # Returns @countries
+      @countries.each do |c|
+        return c if c == string
+      end
+      #puts "Did not find #{string}"
       nil
     end
+    # Tediously copying over array formulae, almost as if Countries should have been subclassed
+    # from Array
     def sort!; @countries.sort!; end
     def length; @countries.length; end
-    # Remove countries with no data
+    # Remove countries with no RAW data
     def compact!
-      @countries = @countries.select { |c| c.to_f != nil }
+      @countries = @countries.reject { |c| c.empty? }
+    end
+    def reject!(&block)
+      @countries.reject!(&block)
     end
     def reverse!; @countries.reverse!; end
     # sizes is an array of sizes of each slice that should be returned
@@ -80,9 +89,22 @@ module Cory
     # It is generally (though not always) good practice to normalise data for choropleth maps
 
     def normalise # using normalisation data in CSV in options
-      log.debug "Normalising countries from CSV file"
+      log.debug "Normalising countries from CSV file: reading #{@options.normalisation_data}/#{@options.normalise}.csv"
+      # If the CSV file has headers, .each will yield CSV::Row objects (1 per line)
+      # If no headers, .each will yield an array representing the row (hopefully with 2 elements)
       CSV.read("#{@options.normalisation_data}/#{@options.normalise}.csv", headers: @options.normalisation_data_header).each do |country_code, normalisation_number|
-        search(country_code).normaliser = normalisation_number.to_f
+        # Catch CSV::Row
+        if country_code.class == CSV::Row
+          country_code, normalisation_number = country_code[0], country_code[1]
+        end
+        # Error: normalisation data may contain countries not in the main country database, in which
+        # case search() will return nil
+        country = search country_code
+        if country
+          country.normaliser = normalisation_number.to_f
+        else
+          log.error "Country #{country_code} not found in country database -- consider adding it to #{@options.country_data} and creating a pull request.  For now this normalisation data will be discarded (this does NOT mean that any of your data is being discarded)."
+        end
       end
     end
     def dont_normalise
@@ -96,6 +118,7 @@ module Cory
         # Could be nil at this point
         country_name, data_point = row.slice(0,2) # Ignore subsequent rows
         unless data_point and data_point.numeric?
+          # TODO: currently discards numbers with commas
           log.warn "Discarding non numeric data (#{data_point}) for '#{country_name}'"
           next
         end
@@ -186,6 +209,7 @@ module Cory
     alias_method :name, :to_s
     def ==(other)
       # duck type: does it match other.to_s
+      # clean has to be applied to both sides of the comparison
       match_synonyms.include? clean(other.to_s)
     end
     def <=>(other)
@@ -194,8 +218,27 @@ module Cory
     end
     def data_point
       # Can we check if we are meant to be normalising?
-      raise "#{to_s} has not been told whether to normalise data yet" if @normaliser == nil
-      #raise "#{to_s} has not been told what its data point is yet" unless @raw_data
+      if @normaliser == nil
+        # This country hasn't been told whether to normalise yet.
+        # This means EITHER:
+        #   1. There is no normalisation data (population, area etc) for this country), even though it
+        #      exists in the country synonyms file (OKAY)
+        #   2. There is no normalisation data for this country, even though it exists in the user data (BAD)
+        #   3. Something else has gone wrong (BAD)
+        # (1) should have been eliminated by compact in Countries#fill, leaving only badness
+
+        # TODO: each of these warnings flashes up every time data_point is called, i.e. about 6 times
+        log.warn "#{to_s} has not been told whether to normalise data yet"
+        case @options.normalise
+        when false
+          raise "#{to_s} should have been told that no countries are being normalised."
+        when Symbol # usually :population, :area or :gdp
+          log.error "Normalisation dataset for #{@options.normalise.to_s} does not contain #{to_s}!  This data point cannot be included in your map, sorry.  Discarding."
+          return nil # so that this country can be deleted
+        else
+          raise "Unexpected value for options.normalise: #{@options.normalise}"
+        end
+      end
       return nil unless @raw_data
       if @normaliser
         @raw_data / @normaliser
@@ -206,6 +249,7 @@ module Cory
     def data_summary
       "<tr><td>#{@short_name}</td><td>#{@raw_data}</td><td>#{@normaliser}</td><td>#{data_point}</td></tr>"
     end
+    def empty?; !@raw_data; end
     alias_method :to_f, :data_point
 
     ##################################################################################
@@ -221,7 +265,7 @@ module Cory
       I18n.transliterate synonym.strip.gsub(/[\.\,\’\'\s]/,'').downcase
     end
     def match_synonyms
-      [ @alpha_2, @alpha_3, @numerical, @other_synonyms ].flatten
+      [ @alpha_2, @alpha_3, @numerical, @other_synonyms ].flatten.collect { |s| clean(s) }
     end
   end
 end

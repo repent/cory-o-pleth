@@ -4,7 +4,7 @@ require 'ostruct'
 module Cory
   class Options
     include Logging
-    attr_accessor :verbose, :circles, :input_data, :input_data_header, :country_data, :country_data_header, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :logfile, :wb_indicator, :wb_year, :source, :title, :print_discards, :text_legend, :normalise, :normalisation_data, :normalisation_year, :normalisation_data_header, :normalised_data_log, :no_data_colour
+    attr_accessor :verbose, :circles, :input_data, :input_data_header, :country_data, :country_data_header, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :logfile, :wb_indicator, :wb_year, :source, :title, :print_discards, :text_legend, :normalise, :normalisation_data, :normalisation_year, :normalisation_data_header, :normalised_data_log, :no_data_colour, :text_legend_file
 
     def initialize(argv)
       @verbose = false
@@ -24,6 +24,7 @@ module Cory
       @palette_size = 3
       @reverse = false
       @text_legend = :file
+      @text_legend_file = false
       @no_data_colour = 'e0e0e0'
 
       # Set this true if you don't want to overwrite files without asking
@@ -48,7 +49,7 @@ module Cory
       @map = 'maps/BlankMap-World6-cory.svg'
       @normalisation_data = 'normalise'
       @normalisation_data_header = true
-      @normalised_data_log = 'normalise/normalised_data.html'
+      @normalised_data_log = false #'normalise/normalised_data.html'
       #@map = 'maps/BlankMap-World8-cory.svg'
 
       # Normalisation
@@ -80,14 +81,20 @@ module Cory
     
     #log.debug("Parsing options")
 
-    def legend_file
-      @output.gsub /\.svg$/, '.txt'
-    end
+    #def legend_file
+    #  @output.gsub /\.svg$/, '.txt'
+    #end
 
     def circles_css
       circles ? "opacity: 1;" : ""
     end
-    
+
+    def die(message)
+      log.fatal message
+      $stderr.puts message
+      exit 1
+    end
+
     private
 
     def parse(argv)
@@ -125,6 +132,7 @@ module Cory
         opts.on('-m', '--map FILE', 'Map file (must have tag indicating where to insert CSS)') { |m| @map = m }
         opts.on('-n', '--colour-levels N', 'Number of colour levels to use (more important when used with -b) -- the options available are limited by your chosen palette (-p)') { |n| @palette_size = n }
         opts.on('-N', '--normalise [FACTOR]', 'Normalise your data by FACTOR') do |f|
+          die "No normalisation factor supplied, -N requires an argument (try -N population)" unless f and f.strip != ''
           if ['population', 'gdp', 'area'].include? f.downcase.strip
             @normalise = f.downcase.strip.to_sym
           else
@@ -159,7 +167,10 @@ module Cory
         end
       end
       @input_data = argv[0] if argv[0]
-      @output ||= @input.data.sub /\.csv$/i, '.svg'
+      basename = @input_data.sub /\.csv$/i, ''
+      @output ||= basename + '.svg'
+      @normalised_data_log ||= basename + '.html'
+      @text_legend_file ||= basename + '.legend'
     end
     
     #log.debug("Started #{$0}")
