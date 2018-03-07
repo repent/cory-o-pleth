@@ -133,13 +133,17 @@ Cory::PALETTES = {
     ["#fcfbfd","#efedf5","#dadaeb","#bcbddc","#9e9ac8","#807dba","#6a51a3","#54278f","#3f007d"]
     ],
     Blues: [
-    ["#deebf7","#9ecae1","#3182bd"],
-    ["#eff3ff","#bdd7e7","#6baed6","#2171b5"],
-    ["#eff3ff","#bdd7e7","#6baed6","#3182bd","#08519c"],
-    ["#eff3ff","#c6dbef","#9ecae1","#6baed6","#3182bd","#08519c"],
-    ["#eff3ff","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#084594"],
-    ["#f7fbff","#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#084594"],
-    ["#f7fbff","#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#08519c","#08306b"]
+      # Added central colour as a 1 (temporay fix to #16)
+      #["#9ecae1"],
+      # That was a bit light, try the darkest of the 3 (better)
+      ["#3182bd"],
+      ["#deebf7","#9ecae1","#3182bd"],
+      ["#eff3ff","#bdd7e7","#6baed6","#2171b5"],
+      ["#eff3ff","#bdd7e7","#6baed6","#3182bd","#08519c"],
+      ["#eff3ff","#c6dbef","#9ecae1","#6baed6","#3182bd","#08519c"],
+      ["#eff3ff","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#084594"],
+      ["#f7fbff","#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#084594"],
+      ["#f7fbff","#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#08519c","#08306b"]
     ],
     Greens: [
     ["#e5f5e0","#a1d99b","#31a354"],
