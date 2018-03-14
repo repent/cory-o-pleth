@@ -25,11 +25,19 @@ class Float
   def to_wikipedia(format=nil)
     case format
     when :crap
+      # Print in a sensible (non SF) way
       a,b = two_part
       b = b.to_i
       if b >= -2 and b <= 4
-        # Print in a sensible (non SF) way
-        %Q(#{a} × 10<sup>#{b}</sup>)
+        case b
+        when -2,-1,0
+          sprintf("%.2f", self)
+        when 1,2
+          sprintf("%.1f", self)
+        when 3,4
+          sprintf("%d", self)
+        #%Q(#{a} × 10<sup>#{b}</sup>)
+      end
       else
         %Q(#{a} × 10<sup>#{b}</sup>)
       end
