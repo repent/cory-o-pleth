@@ -1,7 +1,9 @@
 # basket * data_array [name, index] = colour_array [name, hex_colour]
 require_relative 'float'
-require_relative 'legend'
+#require_relative 'legend'
+require_relative 'svg'
 require 'roundest'
+
 
 module Cory
   class Basket
@@ -123,7 +125,7 @@ module Cory
       position = 0
       text_offset = 10 + y_side / 2
       sup, sub = -10, 10
-      x_pos = 300
+      x_pos = 100 # 300
       y_pos = 700
 
       x_unit_offset = 80
