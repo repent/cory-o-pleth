@@ -60,6 +60,8 @@ module Cory
       @countries.reject!(&block)
     end
     def reverse!; @countries.reverse!; end
+    def [](i); @countries[i]; end
+    def each &block; @countries.each { |c| block.call(c) }; end
     # sizes is an array of sizes of each slice that should be returned
     # the sum of all sizes must equal the length of the array.
     #
@@ -82,7 +84,28 @@ module Cory
       slices
     end
 
+    def to_css
+      css = []
+      @countries.each { |c| css << c.to_css }
+      css
+    end
+
+    #def assign_linear_colours(scale)
+    #end
+
     private
+
+    #def limits # [ lowest, highest ] data from countries
+    #  min = max = nil
+    #  @countries.each do |country|
+    #    data = country.data_point
+    #    max ||= data
+    #    min ||= data
+    #    max = data if data > max
+    #    min = data if data < min
+    #  end
+    #  [ min, max ]
+    #end
 
     # Normalisation
     # -N requests data is normalised (divided) by a factor such as population, area, gdp etc
@@ -139,6 +162,8 @@ module Cory
       end
     end
 
+
+
     # Junk no longer needed
 
     #def translate(name)
@@ -179,6 +204,7 @@ module Cory
     #attr_accessor :normaliser
     attr_writer :normaliser, :raw_data
     attr_reader :alpha_2, :numerical
+    attr_accessor :colour
     def initialize(csv, options) # first: alpha-2 code, remainder: synonyms
       # Format for input array:
       # 1: English short name
@@ -206,12 +232,17 @@ module Cory
       @raw_data = nil
       # E.g. population, gdp, area etc
       @normaliser = nil
+      # Only used for linear interpolation, for the sake of grotesque inconsistency
+      @colour = nil
     end
     #def add(synonym)
     #  @synonyms = @synonyms + [ clean(synonym) ].flatten
     #end
     def to_s; @short_name; end
     alias_method :name, :to_s
+    def to_css
+      ".#{@alpha_2.downcase} { fill: ##{@colour.to_hex}; #{@options.circles} }"
+    end
     def ==(other)
       # duck type: does it match other.to_s
       # clean has to be applied to both sides of the comparison

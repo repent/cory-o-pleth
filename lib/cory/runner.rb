@@ -158,14 +158,29 @@ module Cory
         # Give each data point its own colour based on its position between the largest
         # and smallest value
         when :interpolate
-          raise "This won't work."
-          scale = Scale.import(@options.palette, @options.palette_size)
+          scale = Scale.import(@options)
           scale.reverse! if @options.reverse
 
-          colour_array = scale * data
-          colour_array.each do |c|
-            css.push ".#{countries.translate(c[0])} { fill: ##{c[1].to_hex}; #{circles} }"
-          end
+          #raise "This won't work."
+          #binding.pry
+
+          # Get rid of countries without data
+          #countries.discard_dataless!
+          countries.compact!
+
+          # Populate countries with colour data
+          scale.assign_linear_colours_to(countries)
+
+          # Print css colours
+          css += countries.to_css
+
+          # data no longer exists, elsewhere it is handled in a more object-oriented way
+          # data is now stored in countries
+          #colour_array = scale * data
+          #colour_array.each do |c|
+          #  css.push ".#{countries.translate(c[0])} { fill: ##{c[1].to_hex}; #{circles} }"
+          #end
+
         else
           log.fatal "Unknown colour rule #{@options.colour_rule}"
           exit 1
