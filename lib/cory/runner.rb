@@ -244,7 +244,7 @@ STATIC_CSS
           end
           log.warn "Overwriting #{@options.text_legend_file}"
           legend = File.open(@options.text_legend_file, 'w')
-          legend << @baskets.print_legend
+          legend << @baskets.wikipedia_legend
           legend.close
         else
           log.debug "Printing legend"

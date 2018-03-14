@@ -26,6 +26,9 @@ module Cory
     def to_s; "min: #{min.simple}, max: #{max.simple}, colour: #{@colour}, contents: #{@countries.length}"; end
     def max; @countries.max.data_point; end
     def min; @countries.min.data_point; end
+    def wiki_range
+      "#{min.to_wikipedia@options.wikipedia_number_format} -- #{max.to_wikipedia@options.wikipedia_number_format}"
+    end
     def to_css
       css = []
       @countries.each do |country|
@@ -109,6 +112,14 @@ module Cory
       str = ''
       @baskets.each do |b|
         str << "#{f(b.min)} --- #{f(b.max)}   #{b.colour}   [#{b.countries.length} countries]" << "\n"
+      end
+      str
+    end
+
+    def wikipedia_legend
+      str = ''
+      @baskets.each do |b|
+        str << "{{Legend|#{b.colour}|#{b.wiki_range}}}" << "\n"
       end
       str
     end

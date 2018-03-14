@@ -4,7 +4,7 @@ require 'ostruct'
 module Cory
   class Options
     include Logging
-    attr_accessor :verbose, :circles, :input_data, :input_data_header, :country_data, :country_data_header, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :logfile, :wb_indicator, :wb_year, :source, :title, :print_discards, :text_legend, :normalise, :normalisation_data, :normalisation_year, :normalisation_data_header, :normalised_data_log, :no_data_colour, :text_legend_file, :graphical_legend, :legend_unit
+    attr_accessor :verbose, :circles, :input_data, :input_data_header, :country_data, :country_data_header, :colour_rule, :output, :becareful, :map, :palette, :palette_size, :reverse, :logfile, :wb_indicator, :wb_year, :source, :title, :print_discards, :text_legend, :normalise, :normalisation_data, :normalisation_year, :normalisation_data_header, :normalised_data_log, :no_data_colour, :text_legend_file, :graphical_legend, :legend_unit, :wikipedia_number_format
 
     def initialize(argv)
       @verbose = false
@@ -28,6 +28,7 @@ module Cory
       @graphical_legend = true
       @legend_unit = nil
       @no_data_colour = '#e0e0e0'
+      @wikipedia_number_format = :crap
 
       # Set this true if you don't want to overwrite files without asking
       @becareful = false
