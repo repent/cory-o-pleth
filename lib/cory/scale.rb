@@ -1,8 +1,6 @@
 module Cory
   class Scale < ColourRange
-    # Multiply this Scale by a data array to return an array of countries and colours
-    # Currently this is only being multiplied by a float
-    def *(data)
+    def *(countries)
       begin
         raise "Scale.* requires a populated array (got #{data})" unless data.class == Array and !data.empty?
       rescue => e
@@ -29,19 +27,19 @@ module Cory
       result # Array, each line [ 'country_name', Colour ]
     end
 
-    private
-
-    def limits(data)
-      min=max=nil
-      data.each do |line|
-        value=line[1]
-        # Nudge upper/lower bounds
-        max ||= value
-        min ||= value
-        max = value if value > max
-        min = value if value < min
+    def assign_linear_colours_to(countries)
+      min, max = limits(countries)
+      diff = max - min
+      if diff == 0
+        log.fatal "Cannot use linear interpolation if all data points are the same.  Try -b"
+        exit 1
       end
-      [min,max]
+
+      countries.each do |country|
+        index = (( country.data_point - min ) / diff ) * 100 # diff checked for zero above
+        # TODO: #colour=
+        country.colour = index_to_colour(index)
+      end
     end
 
     def index_to_colour(i)
@@ -60,7 +58,17 @@ module Cory
       result # Colour
     end
 
-    public
+    def limits(countries)
+      min = max = nil
+      countries.each do |country|
+        data = country.data_point
+        max ||= data
+        min ||= data
+        max = data if data > max
+        min = data if data < min
+      end
+      [ min, max ]
+    end
 
     # Distance between adjacent points, as a percentage of the overall scale
     def spacing

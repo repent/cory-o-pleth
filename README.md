@@ -8,13 +8,12 @@ A command-line tool for converting csv data into choropleth maps.
 
 ## Usage
 
-    Usage: ruby -I lib bin/cory [options] output
+    Usage: ruby -I lib bin/cory [options] input
         -b, --basket                     Group countries into discrete baskets (default: linear-ish interpolation, see docs)
         -c, --countries FILE             Take country name data from FILE (a CSV file)
         -d, --print-discards             Print country names that aren's matched
         -h, --help                       Print this help
         -H, --header                     Ignore first line of CSV input
-        -i, --input FILE                 Take choropleth data from FILE (a CSV file)
         -l, --log LEVEL                  Set log level (from debug, info, warn, error, fatal)
         -L, --logfile FILE               Log to FILE instead of standard error
         -m, --map FILE                   Map file (must have tag indicating where to insert CSS)
@@ -38,7 +37,7 @@ Output: https://commons.wikimedia.org/wiki/File:Africa_Visa_Openness_in_2016.svg
 
 Command:
 
-    ruby -I lib bin/cory -b -n 7 -i stats/africa_visa_openness_2016.csv -m maps/BlankMap-Africa-cory.svg -p RdYlGn africa_visa_openness_2016.svg
+    ruby -I lib bin/cory -b -n 7 stats/africa_visa_openness_2016.csv -m maps/BlankMap-Africa-cory.svg -p RdYlGn -o africa_visa_openness_2016.svg
 
 ### Direct use of WB data
 

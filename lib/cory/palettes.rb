@@ -32,8 +32,8 @@ Cory::PALETTES = {
     ["#ffffcc","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#0c2c84"],
     ["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#0c2c84"],
     ["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58"]
-    ],
-    GnBu: [
+  ],
+  GnBu: [
     ["#e0f3db","#a8ddb5","#43a2ca"],
     ["#f0f9e8","#bae4bc","#7bccc4","#2b8cbe"],
     ["#f0f9e8","#bae4bc","#7bccc4","#43a2ca","#0868ac"],
@@ -41,8 +41,8 @@ Cory::PALETTES = {
     ["#f0f9e8","#ccebc5","#a8ddb5","#7bccc4","#4eb3d3","#2b8cbe","#08589e"],
     ["#f7fcf0","#e0f3db","#ccebc5","#a8ddb5","#7bccc4","#4eb3d3","#2b8cbe","#08589e"],
     ["#f7fcf0","#e0f3db","#ccebc5","#a8ddb5","#7bccc4","#4eb3d3","#2b8cbe","#0868ac","#084081"]
-    ],
-    BuGn: [
+  ],
+  BuGn: [
     ["#e5f5f9","#99d8c9","#2ca25f"],
     ["#edf8fb","#b2e2e2","#66c2a4","#238b45"],
     ["#edf8fb","#b2e2e2","#66c2a4","#2ca25f","#006d2c"],
@@ -50,8 +50,8 @@ Cory::PALETTES = {
     ["#edf8fb","#ccece6","#99d8c9","#66c2a4","#41ae76","#238b45","#005824"],
     ["#f7fcfd","#e5f5f9","#ccece6","#99d8c9","#66c2a4","#41ae76","#238b45","#005824"],
     ["#f7fcfd","#e5f5f9","#ccece6","#99d8c9","#66c2a4","#41ae76","#238b45","#006d2c","#00441b"]
-    ],
-    PuBuGn: [
+  ],
+  PuBuGn: [
     ["#ece2f0","#a6bddb","#1c9099"],
     ["#f6eff7","#bdc9e1","#67a9cf","#02818a"],
     ["#f6eff7","#bdc9e1","#67a9cf","#1c9099","#016c59"],
@@ -59,8 +59,8 @@ Cory::PALETTES = {
     ["#f6eff7","#d0d1e6","#a6bddb","#67a9cf","#3690c0","#02818a","#016450"],
     ["#fff7fb","#ece2f0","#d0d1e6","#a6bddb","#67a9cf","#3690c0","#02818a","#016450"],
     ["#fff7fb","#ece2f0","#d0d1e6","#a6bddb","#67a9cf","#3690c0","#02818a","#016c59","#014636"]
-    ],
-    PuBu: [
+  ],
+  PuBu: [
     ["#ece7f2","#a6bddb","#2b8cbe"],
     ["#f1eef6","#bdc9e1","#74a9cf","#0570b0"],
     ["#f1eef6","#bdc9e1","#74a9cf","#2b8cbe","#045a8d"],
@@ -68,8 +68,8 @@ Cory::PALETTES = {
     ["#f1eef6","#d0d1e6","#a6bddb","#74a9cf","#3690c0","#0570b0","#034e7b"],
     ["#fff7fb","#ece7f2","#d0d1e6","#a6bddb","#74a9cf","#3690c0","#0570b0","#034e7b"],
     ["#fff7fb","#ece7f2","#d0d1e6","#a6bddb","#74a9cf","#3690c0","#0570b0","#045a8d","#023858"]
-    ],
-    BuPu: [
+  ],
+  BuPu: [
     ["#e0ecf4","#9ebcda","#8856a7"],
     ["#edf8fb","#b3cde3","#8c96c6","#88419d"],
     ["#edf8fb","#b3cde3","#8c96c6","#8856a7","#810f7c"],
@@ -77,8 +77,8 @@ Cory::PALETTES = {
     ["#edf8fb","#bfd3e6","#9ebcda","#8c96c6","#8c6bb1","#88419d","#6e016b"],
     ["#f7fcfd","#e0ecf4","#bfd3e6","#9ebcda","#8c96c6","#8c6bb1","#88419d","#6e016b"],
     ["#f7fcfd","#e0ecf4","#bfd3e6","#9ebcda","#8c96c6","#8c6bb1","#88419d","#810f7c","#4d004b"]
-    ],
-    RdPu: [
+  ],
+  RdPu: [
     ["#fde0dd","#fa9fb5","#c51b8a"],
     ["#feebe2","#fbb4b9","#f768a1","#ae017e"],
     ["#feebe2","#fbb4b9","#f768a1","#c51b8a","#7a0177"],
@@ -295,8 +295,8 @@ Cory::PALETTES = {
     ["#1b9e77","#d95f02","#7570b3","#e7298a","#66a61e","#e6ab02"],
     ["#1b9e77","#d95f02","#7570b3","#e7298a","#66a61e","#e6ab02","#a6761d"],
     ["#1b9e77","#d95f02","#7570b3","#e7298a","#66a61e","#e6ab02","#a6761d","#666666"]
-    ],
-    Paired: [
+  ],
+  Paired: [
     ["#a6cee3","#1f78b4","#b2df8a"],
     ["#a6cee3","#1f78b4","#b2df8a","#33a02c"],
     ["#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99"],
@@ -307,8 +307,8 @@ Cory::PALETTES = {
     ["#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c","#fdbf6f","#ff7f00","#cab2d6","#6a3d9a"],
     ["#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c","#fdbf6f","#ff7f00","#cab2d6","#6a3d9a","#ffff99"],
     ["#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c","#fdbf6f","#ff7f00","#cab2d6","#6a3d9a","#ffff99","#b15928"]
-    ],
-    Pastel1: [
+  ],
+  Pastel1: [
     ["#fbb4ae","#b3cde3","#ccebc5"],
     ["#fbb4ae","#b3cde3","#ccebc5","#decbe4"],
     ["#fbb4ae","#b3cde3","#ccebc5","#decbe4","#fed9a6"],
@@ -316,16 +316,16 @@ Cory::PALETTES = {
     ["#fbb4ae","#b3cde3","#ccebc5","#decbe4","#fed9a6","#ffffcc","#e5d8bd"],
     ["#fbb4ae","#b3cde3","#ccebc5","#decbe4","#fed9a6","#ffffcc","#e5d8bd","#fddaec"],
     ["#fbb4ae","#b3cde3","#ccebc5","#decbe4","#fed9a6","#ffffcc","#e5d8bd","#fddaec","#f2f2f2"]
-    ],
-    Pastel2: [
+  ],
+  Pastel2: [
     ["#b3e2cd","#fdcdac","#cbd5e8"],
     ["#b3e2cd","#fdcdac","#cbd5e8","#f4cae4"],
     ["#b3e2cd","#fdcdac","#cbd5e8","#f4cae4","#e6f5c9"],
     ["#b3e2cd","#fdcdac","#cbd5e8","#f4cae4","#e6f5c9","#fff2ae"],
     ["#b3e2cd","#fdcdac","#cbd5e8","#f4cae4","#e6f5c9","#fff2ae","#f1e2cc"],
     ["#b3e2cd","#fdcdac","#cbd5e8","#f4cae4","#e6f5c9","#fff2ae","#f1e2cc","#cccccc"]
-    ],
-    Set1: [
+  ],
+  Set1: [
     ["#e41a1c","#377eb8","#4daf4a"],
     ["#e41a1c","#377eb8","#4daf4a","#984ea3"],
     ["#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00"],
@@ -333,8 +333,8 @@ Cory::PALETTES = {
     ["#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00","#ffff33","#a65628"],
     ["#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00","#ffff33","#a65628","#f781bf"],
     ["#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00","#ffff33","#a65628","#f781bf","#999999"]
-    ],
-    Set2: [
+  ],
+  Set2: [
     ["#66c2a5","#fc8d62","#8da0cb"],
     ["#66c2a5","#fc8d62","#8da0cb","#e78ac3"],
     ["#66c2a5","#fc8d62","#8da0cb","#e78ac3","#a6d854"],

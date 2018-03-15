@@ -8,6 +8,8 @@ require_relative 'basket'
 require_relative 'colorbrewer'
 require_relative 'data_catalog'
 require_relative 'indicators'
+require_relative 'string'
+#require_relative 'dataset'
 #require_relative 'datapoint'
 require 'csv'
 require 'pry'
@@ -24,113 +26,101 @@ module Cory
     end
 
     def run
-      #i=Indicators.new
-      # Importing Country Data
-      # This is not user-editable
-      log.debug "Area names: #{@options.country_data}"
-      country_data = CSV.read(@options.country_data)
-      country_data.shift # ditch header
-      countries = Countries.new(country_data)
-      if @options.normalise
-        norm_file = "#{@options.normalisation_data}/#{@options.normalise}.csv"
-        begin
-          countries.normalise(norm_file, @options.normalisation_data_headers)
-        rescue Errno::ENOENT
-          log.fatal "Could not find normalisation file #{norm_file}"
-          exit
-        end
-      end
-      # End of Country Data
+      # Importing country names, synonyms from CSV, then data
+      # TODO: This now ignores direct access of WB data
+      #       Option has been removed for now/ever
+      countries = Countries.new(@options)
 
-      log.debug "Source: #{@options.source}"
-
-      unrecognised = []
-
-      # Importing statistics that will be the basis of country colours
-      data = case @options.source
-        when :file
-          #@options.title = "World Map: #{@options.input_data}"
-          log.debug "Reading source data from file #{@options.input_data}"
-          data = CSV.read @options.input_data
-
-          # Data Cleaning for CSV
-          # select! returns nil if no changes were made, so have to use non-destructive version
-          # Get rid of later columns and nil values
-          data = data.collect { |d| d.slice(0,2) }.select { |d| d[1] and d[1].strip != '' }
-          # Remove unrecognised countries (but remember what the failures were)
-          unrecognised = data.select { |d| !countries.has? d[0].to_s }
-          data = data.select { |d| countries.has? d[0].to_s }
-          # Convert numerical data to floating point (will start off as text if from CSV)
-          data = data.collect { |d| d[1] = d[1].to_f; d }
-          # End of Data Cleaning
-
-          # Normalisation
-          if @options.normalise
-            # Replace data with normalised data
-            data = data.collect do |name,data_point|
-              country = countries.get(name.to_s)
-              if country.normaliser and country.normaliser != 0.0
-                data_point = data_point / country.normaliser
-                binding.pry if data_point == Float::INFINITY
-                [name,data_point]
-              else
-                log.error "Couldn't normalise #{name} [normalising by #{@options.normalise}, normaliser #{country.normaliser.to_s}] -- dropping this datapoint"
-                nil
-              end
-            end
-            # Drop values set to nil above
-            data.compact!
-            #normal = CSV.read "#{@options.normalisation_data}/#{@options.normalise.to_s}.csv"
-            # Check that all data points can be normalised
-          end
-
-          data
-
-        when :wb
-          log.debug "Downloading source data from World Bank"
-          log.debug "Using dataset #{@options.wb_indicator}"
-          dc = DataCatalog.new(@options.wb_indicator, @options.wb_year)
-          @options.title = dc.title
-          dc.to_a
-          # Data Cleaning for WB done in class
-      end
-
+      #  when :wb
+      #    log.debug "Downloading source data from World Bank"
+      #    log.debug "Using dataset #{@options.wb_indicator}"
+      #    dc = DataCatalog.new(@options.wb_indicator, @options.wb_year)
+      #    @options.title = dc.title
+      #    dc.to_a
+      #end
 
       css = [ "\n",
         ".landxx { fill: ##{@options.no_data_colour}; }",
         "\n" ]
 
-      circles = @options.circles ? "opacity: 1;" : ""
-
-
-
+      # Assign colours to countries according to the selected rule
       case @options.colour_rule
+
         # Sort data points into n baskets, each containing a similar number, and colour each
         # basket according to a colour explicitly defined in PALETTE
         when :basket
-          @baskets = Baskets.import(@options.palette, @options.palette_size)
+          # #import pulls in data on colours
+          @baskets = Baskets.import(@options)
           # Since rewriting the basket code to output a legend, the colours get reversed.
           # I'm not sure if there is really a "logical" way around embedded in the colour data
           # or not, so not sure if this is an error or just an arbitrary result.  So kludging
           # it here and moving on, woop [unless instead of if].
           @baskets.reverse! unless @options.reverse
 
-          colour_array = @baskets * data
-          colour_array.each do |c|
-            #next unless countries.has? c[0]
-            css.push ".#{countries.translate(c[0])} { fill: ##{c[1].to_hex}; #{circles} }"
-          end
+          # Distribute countries into baskets
+          # Remove countries for which no user data is supplied
+          @baskets.fill(countries)
+
+          css << @baskets.to_css
+
+          # Output normalised, basketed data to a HTML log for error-checking
+          @baskets.data_summary
+
+          # Fuck around with an svg legend
+          #@baskets.svg_legend
+          #exit
+
+          #colour_array = @baskets * data
+          #colour_array.each do |c|
+          #  #next unless countries.has? c[0]
+          #  css.push ".#{countries.translate(c[0])} { fill: ##{c[1].to_hex}; #{circles} }"
+          #end
+
+          #CSV.open(@options.normalised_data_log, 'wb') do |csv|
+          #  n = 1
+          #  @baskets.each do |basket|
+          #    # Basket header
+          #    csv << [ "Basket #{n}: #{basket}" ]
+          #    basket.countries.each do |c|
+          #      # These are just country names, not objects
+          #      # I think this has got too complicated for my tiny brain to comprehend
+          #      #binding.pry
+          #      obj = countries.get(c)
+          #      csv << [ obj.name ]
+          #      #binding.pry
+          #    end
+          #    n += 1
+          #  end
+          #  #data.each { |d| csv << d }
+          #end
+
 
         # Give each data point its own colour based on its position between the largest
         # and smallest value
         when :interpolate
-          scale = Scale.import(@options.palette, @options.palette_size)
+          scale = Scale.import(@options)
           scale.reverse! if @options.reverse
 
-          colour_array = scale * data
-          colour_array.each do |c|
-            css.push ".#{countries.translate(c[0])} { fill: ##{c[1].to_hex}; #{circles} }"
-          end
+          #raise "This won't work."
+          #binding.pry
+
+          # Get rid of countries without data
+          #countries.discard_dataless!
+          countries.compact!
+
+          # Populate countries with colour data
+          scale.assign_linear_colours_to(countries)
+
+          # Print css colours
+          css += countries.to_css
+
+          # data no longer exists, elsewhere it is handled in a more object-oriented way
+          # data is now stored in countries
+          #colour_array = scale * data
+          #colour_array.each do |c|
+          #  css.push ".#{countries.translate(c[0])} { fill: ##{c[1].to_hex}; #{circles} }"
+          #end
+
         else
           log.fatal "Unknown colour rule #{@options.colour_rule}"
           exit 1
@@ -172,6 +162,9 @@ STATIC_CSS
           end
         elsif l =~ /World Map/
           output.puts l.sub(/World Map/, @options.title)
+        elsif l =~ /\<\/svg\>/ and @options.graphical_legend and @options.colour_rule == :basket
+          @baskets.svg_legend(output)
+          output.puts l
         else
           output.puts l
         end
@@ -185,13 +178,13 @@ STATIC_CSS
       if @options.text_legend and (@options.colour_rule == :basket)
         if @options.text_legend == :file
           # Dump to file
-          if File.exist? @options.legend_file and @options.becareful
-            puts "#{@options.legend_file} already exists and 'warn' option has been set, exiting"
+          if File.exist? @options.text_legend_file and @options.becareful
+            puts "#{@options.text_legend_file} already exists and 'warn' option has been set, exiting"
             exit 1
           end
-          log.warn "Overwriting #{@options.legend_file}"
-          legend = File.open(@options.legend_file, 'w')
-          legend << @baskets.print_legend
+          log.warn "Overwriting #{@options.text_legend_file}"
+          legend = File.open(@options.text_legend_file, 'w')
+          legend << @baskets.wikipedia_legend
           legend.close
         else
           log.debug "Printing legend"

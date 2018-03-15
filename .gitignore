@@ -2,8 +2,11 @@
 *.xlsx
 *.ods
 *.csv
+!data/*.csv
 *.log
 *.css
 untracked
 .~*
 *.txt
+*.legend
+*.html
