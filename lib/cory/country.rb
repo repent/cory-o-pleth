@@ -50,6 +50,7 @@ module Cory
     end
     # Tediously copying over array formulae, almost as if Countries should have been subclassed
     # from Array
+    # Enumerable is mixed in though, see https://ruby-doc.org/core-2.5.0/Enumerable.html
     def sort!; @countries.sort!; end
     def length; @countries.length; end
     # Remove countries with no RAW data
@@ -90,22 +91,27 @@ module Cory
       css
     end
 
-    #def assign_linear_colours(scale)
-    #end
+    def uniform? # Are all present data points the same?
+      # User has asked data to be normalised, so would have had to supply data identical to
+      # normalisation data, indicating he is a prick
+      return false if @options.normalise
+      first_value = @countries.first.data_point
+      @countries.each do |c|
+        raise "Data should have been cleaned of missing values before now" unless c.data_point
+        return false if c.data_point != first_value
+      end
+      true
+    end
+
+    def set_all(colour)
+      @countries.each do |c|
+        raise "Missing country data, should already have been compact!ed" unless c.data_point
+        raise "Colour already set, should be empty" if c.colour
+        c.colour = colour
+      end
+    end
 
     private
-
-    #def limits # [ lowest, highest ] data from countries
-    #  min = max = nil
-    #  @countries.each do |country|
-    #    data = country.data_point
-    #    max ||= data
-    #    min ||= data
-    #    max = data if data > max
-    #    min = data if data < min
-    #  end
-    #  [ min, max ]
-    #end
 
     # Normalisation
     # -N requests data is normalised (divided) by a factor such as population, area, gdp etc
@@ -161,20 +167,11 @@ module Cory
         country.raw_data = data_point.to_f
       end
     end
-
-
-
-    # Junk no longer needed
-
-    #def translate(name)
-    #  raise "Deprecated"
-    #  @countries.each do |c|
-    #    return c.to_s if c.match? name
-    #  end
-    #  log.warn("Do not recognise country in source data: '#{name}' (dropping this data point!)")
-    #  false
-    #end
   end
+
+##############################################################################################
+##############################################################################################
+##############################################################################################
 
   class Country
     include Logging
@@ -241,7 +238,7 @@ module Cory
     def to_s; @short_name; end
     alias_method :name, :to_s
     def to_css
-      ".#{@alpha_2.downcase} { fill: ##{@colour.to_hex}; #{@options.circles} }"
+      ".#{@alpha_2.downcase} { fill: ##{@colour.to_hex}; #{@options.circles_css} }"
     end
     def ==(other)
       # duck type: does it match other.to_s

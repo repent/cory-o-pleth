@@ -15,8 +15,7 @@ require 'csv'
 require 'pry'
 require 'ap'
 
-# Bugs
-# * For some reason Ukraine isn't shaded!
+# Bugs: see https://github.com/repent/cory-o-pleth/issues
 
 module Cory
   class Runner
@@ -30,6 +29,14 @@ module Cory
       # TODO: This now ignores direct access of WB data
       #       Option has been removed for now/ever
       countries = Countries.new(@options)
+
+      # Get rid of countries without data
+      #countries.discard_dataless!
+      countries.compact!
+
+      # Check whether all data is the same, if so, switch to binary colouring
+
+      @options.colour_rule = :binary if countries.uniform?
 
       #  when :wb
       #    log.debug "Downloading source data from World Bank"
@@ -77,14 +84,15 @@ module Cory
           #raise "This won't work."
           #binding.pry
 
-          # Get rid of countries without data
-          #countries.discard_dataless!
-          countries.compact!
-
           # Populate countries with colour data
           scale.assign_linear_colours_to(countries)
 
           # Print css colours
+          css += countries.to_css
+          
+        when :binary
+          log.info "All data appears to be the same, all countries listed will be rendered the same colour"
+          countries.set_all ColourRange.single_colour(@options)
           css += countries.to_css
 
         else
