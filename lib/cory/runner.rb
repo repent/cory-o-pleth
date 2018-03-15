@@ -66,37 +66,10 @@ module Cory
           # Output normalised, basketed data to a HTML log for error-checking
           @baskets.data_summary
 
-          # Fuck around with an svg legend
-          #@baskets.svg_legend
-          #exit
-
-          #colour_array = @baskets * data
-          #colour_array.each do |c|
-          #  #next unless countries.has? c[0]
-          #  css.push ".#{countries.translate(c[0])} { fill: ##{c[1].to_hex}; #{circles} }"
-          #end
-
-          #CSV.open(@options.normalised_data_log, 'wb') do |csv|
-          #  n = 1
-          #  @baskets.each do |basket|
-          #    # Basket header
-          #    csv << [ "Basket #{n}: #{basket}" ]
-          #    basket.countries.each do |c|
-          #      # These are just country names, not objects
-          #      # I think this has got too complicated for my tiny brain to comprehend
-          #      #binding.pry
-          #      obj = countries.get(c)
-          #      csv << [ obj.name ]
-          #      #binding.pry
-          #    end
-          #    n += 1
-          #  end
-          #  #data.each { |d| csv << d }
-          #end
-
-
         # Give each data point its own colour based on its position between the largest
         # and smallest value
+        # Note: this does use @options.palette_size, which defaults to 3
+        #       Increasing this would follow colourbrewer more closely
         when :interpolate
           scale = Scale.import(@options)
           scale.reverse! if @options.reverse
@@ -113,13 +86,6 @@ module Cory
 
           # Print css colours
           css += countries.to_css
-
-          # data no longer exists, elsewhere it is handled in a more object-oriented way
-          # data is now stored in countries
-          #colour_array = scale * data
-          #colour_array.each do |c|
-          #  css.push ".#{countries.translate(c[0])} { fill: ##{c[1].to_hex}; #{circles} }"
-          #end
 
         else
           log.fatal "Unknown colour rule #{@options.colour_rule}"
