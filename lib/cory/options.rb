@@ -104,7 +104,10 @@ module Cory
       OptionParser.new do |opts|
         opts.banner = "Usage: #{$0} [options] input"
         
-        opts.on('-b', '--basket', 'Group countries into discrete baskets (default: linear-ish interpolation, see docs)') { @colour_rule = :basket }
+        opts.on('-b[NUMBER]', '--basket[=NUMBER]', 'Group countries into NUMBER of discrete baskets (otherwise: linear-ish interpolation, see docs)') do |n|
+          @colour_rule = :basket
+          @palette_size  = n || @palette_size
+        end
         opts.on('-B', '--blank-colour COLOUR', 'Set colour of countries with no data to the hex COLOUR (default is e0e0e0)') do |c|
           log.debug "Setting colour for countries with no data to ##{c.strip}"
           @no_data_colour = c.strip
@@ -133,7 +136,7 @@ module Cory
         end
         opts.on('-L', '--logfile FILE', 'Log to FILE instead of standard error') { |f| log.reopen(f) }
         opts.on('-m', '--map FILE', 'Map file (must have tag indicating where to insert CSS)') { |m| @map = m }
-        opts.on('-n', '--colour-levels N', 'Number of colour levels to use (more important when used with -b) -- the options available are limited by your chosen palette (-p)') { |n| @palette_size = n }
+        #opts.on('-n', '--colour-levels N', 'Number of colour levels to use (more important when used with -b) -- the options available are limited by your chosen palette (-p)') { |n| @palette_size = n }
         opts.on('-N', '--normalise [FACTOR]', 'Normalise your data by FACTOR') do |f|
           die "No normalisation factor supplied, -N requires an argument (try -N population)" unless f and f.strip != ''
           if ['population', 'gdp', 'area'].include? f.downcase.strip
@@ -151,10 +154,10 @@ module Cory
         opts.on('-u', '--unit UNIT', 'Set legend unit to UNIT') { |u| @legend_unit = u }
         opts.on('-v', '--verbose', 'Display verbose output') { @verbose = true }
         opts.on('-w', '--warn', "Don't overwrite any output files") { @becareful == true }
-        opts.on('-W', '--world-bank [INDICATOR]', 'Use INDICATOR from the World Bank Development Indicators as your source') do |i|
-            @wb_indicator = i || 'NV.IND.TOTL.ZS'
-            @source = :wb
-          end
+        #opts.on('-W', '--world-bank [INDICATOR]', 'Use INDICATOR from the World Bank Development #Indicators as your source') do |i|
+        #    @wb_indicator = i || 'NV.IND.TOTL.ZS'
+        #    @source = :wb
+        #  end
         opts.on('-y', '--year', "Year of data to select for World Bank queries") { |y| @wb_year = y }
       
         begin
